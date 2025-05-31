@@ -330,9 +330,9 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Section 3: Kitchen Tools */}
+              {/* Section 3: Kitchen Equipment */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">3. Kitchen Tools</h3>
+                <h3 className="text-xl font-semibold text-white">3. Kitchen Equipment</h3>
                 <div className="bg-black/5 p-4 rounded-lg flex justify-center">
                   <KitchenEquipmentSelector
                     selectedEquipment={selectedEquipment}

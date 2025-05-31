@@ -1,4 +1,3 @@
-<!-- filepath: /home/mavioux/parakmh/cooking-assistant-web-app/doc/Api.md -->
 # Cooking Assistant API Documentation
 
 ## 1. Overview

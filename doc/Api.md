@@ -164,7 +164,7 @@ Retrieves all items in the user's inventory.
 *   **Query Parameters:**
     *   `page` (number, optional): For pagination.
     *   `limit` (number, optional): Items per page.
-    *   `sortBy` (string, optional): Field to sort by (e.g., `name`, `expiryDate`).
+    *   `sortBy` (string, optional): Field to sort by (e.g., `name`, `expiryDate`, `category`).
     *   `sortOrder` (string, optional): `asc` or `desc`.
 *   **Response (200 OK):**
     ```json
@@ -176,7 +176,8 @@ Retrieves all items in the user's inventory.
           "quantity": "number",
           "unit": "string (e.g., 'grams', 'ml', 'pcs')",
           "expiryDate": "string (ISO 8601 Date)",
-          "addedDate": "string (ISO 8601 DateTime)"
+          "addedDate": "string (ISO 8601 DateTime)",
+          "category": "string"
         }
       ],
       "pagination": {
@@ -195,7 +196,8 @@ Adds a new item to the user's inventory.
       "name": "string",
       "quantity": "number",
       "unit": "string",
-      "expiryDate": "string (ISO 8601 Date, optional)"
+      "expiryDate": "string (ISO 8601 Date, optional)",
+      "category": "string (optional, defaults to 'Pantry')"
     }
     ```
 *   **Response (201 Created):**
@@ -206,7 +208,8 @@ Adds a new item to the user's inventory.
       "quantity": "number",
       "unit": "string",
       "expiryDate": "string",
-      "addedDate": "string"
+      "addedDate": "string",
+      "category": "string"
     }
     ```
 *   **Response (400 Bad Request):** Invalid input.
@@ -221,7 +224,8 @@ Updates an existing item in the inventory.
       "name": "string (optional)",
       "quantity": "number (optional)",
       "unit": "string (optional)",
-      "expiryDate": "string (ISO 8601 Date, optional)"
+      "expiryDate": "string (ISO 8601 Date, optional)",
+      "category": "string (optional)"
     }
     ```
 *   **Response (200 OK):**
@@ -232,7 +236,8 @@ Updates an existing item in the inventory.
       "quantity": "number",
       "unit": "string",
       "expiryDate": "string",
-      "addedDate": "string"
+      "addedDate": "string",
+      "category": "string"
     }
     ```
 *   **Response (400 Bad Request):** Invalid input.
@@ -395,8 +400,8 @@ Endpoints to fetch lists of predefined data like meal types, cuisines, common in
 
 Provides a list of common ingredients for typeaheads or selectors.
 *   **Query Parameters (optional):**
-    *   `q` (string): Search term to filter ingredients.
-    *   `limit` (number): Max number of results.
+    *   `q` (string): Search term to filter ingredients by name.
+    *   `limit` (number): Max number of results to return.
 *   **Response (200 OK):**
     ```json
     {

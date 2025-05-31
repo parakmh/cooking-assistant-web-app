@@ -1,4 +1,3 @@
-
 import { useState, KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -273,51 +272,61 @@ const Index = () => {
             </p>
             
             {/* Recipe Generation Form */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-6">
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-left block">Enter your ingredients</label>
-                <Input 
-                  placeholder="Type ingredient and press Enter or comma..."
-                  value={ingredientInput}
-                  onChange={(e) => setIngredientInput(e.target.value)}
-                  onKeyDown={handleIngredientInputKeyDown}
-                  className="bg-white/90 text-kitchen-dark"
-                />
-                {ingredientTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {ingredientTags.map((ingredient, index) => (
-                      <IngredientTag
-                        key={index}
-                        ingredient={ingredient}
-                        onRemove={() => removeIngredientTag(ingredient)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Cooking Time</label>
-                  <Button
-                    variant={isQuickCooking ? "secondary" : "outline"}
-                    onClick={() => setIsQuickCooking(!isQuickCooking)}
-                    className="w-full bg-white/90 text-kitchen-dark hover:bg-white/80"
-                  >
-                    {isQuickCooking ? "Quick (< 30 mins)" : "Any cooking time"}
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Meal Type</label>
-                  <MealTypeSelector
-                    selectedMealType={mealType}
-                    onMealTypeChange={setMealType}
+            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-8 text-left">
+
+              {/* Section 1: Ingredients */}
+              <div className="bg-black/5 p-4 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold text-white">1. What do you have?</h3>
+                <div className="bg-black/5 p-4 rounded-lg">
+                  <Input 
+                    placeholder="Type ingredient and press Enter or comma..."
+                    value={ingredientInput}
+                    onChange={(e) => setIngredientInput(e.target.value)}
+                    onKeyDown={handleIngredientInputKeyDown}
+                    className="bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange"
                   />
+                  {ingredientTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {ingredientTags.map((ingredient, index) => (
+                        <IngredientTag
+                          key={index}
+                          ingredient={ingredient}
+                          onRemove={() => removeIngredientTag(ingredient)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Kitchen Equipment</label>
+              </div>
+
+              {/* Section 2: Preferences */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-white">2. Your Preferences</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/5 p-4 rounded-lg">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white block">Cooking Time</label>
+                    <Button
+                      variant={isQuickCooking ? "secondary" : "outline"}
+                      onClick={() => setIsQuickCooking(!isQuickCooking)}
+                      className="w-full bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange"
+                    >
+                      {isQuickCooking ? "Quick (< 30 mins)" : "Any cooking time"}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white block">Meal Type</label>
+                    <MealTypeSelector
+                      selectedMealType={mealType}
+                      onMealTypeChange={setMealType}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Kitchen Tools */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-white">3. Kitchen Tools (Optional)</h3>
+                <div className="bg-black/5 p-4 rounded-lg">
                   <KitchenEquipmentSelector
                     selectedEquipment={selectedEquipment}
                     onEquipmentChange={setSelectedEquipment}
@@ -325,11 +334,12 @@ const Index = () => {
                 </div>
               </div>
               
+              {/* Generate Button */}
               <Button 
                 onClick={handleGenerateRecipes}
-                className="w-full bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-semibold py-3 text-lg"
+                className="w-full bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold py-4 text-xl rounded-lg shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
               >
-                Suggest me a recipe!
+                Find My Perfect Recipe!
               </Button>
             </div>
           </div>

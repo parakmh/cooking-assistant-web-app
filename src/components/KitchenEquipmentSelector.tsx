@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Wind, Flame } from "lucide-react";
 
@@ -31,7 +30,7 @@ const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: Kitc
           variant={selectedEquipment.includes(equipment.id) ? "default" : "outline"}
           size="icon"
           onClick={() => toggleEquipment(equipment.id)}
-          className="h-12 w-12 bg-white/90 text-kitchen-dark hover:bg-white/80"
+          className={`h-12 w-12 text-kitchen-dark transition-all duration-150 ease-in-out transform hover:scale-110 ${selectedEquipment.includes(equipment.id) ? 'bg-kitchen-green text-white ring-2 ring-kitchen-green-dark' : 'bg-white/90 hover:bg-white/80 border-white/30'}`}
         >
           {equipment.icon === "oven" ? (
             <div className="h-6 w-6 border-2 border-current rounded-sm flex items-center justify-center">

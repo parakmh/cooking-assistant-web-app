@@ -254,7 +254,7 @@ const Index = () => {
     setIngredientTags([]);
     setSelectedIngredients([]);
     setIsQuickCooking(false);
-    setSelectedEquipment([]);
+    setSelectedEquipment(kitchenEquipment.map(tool => tool.id));
     setMealType("");
   };
   

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Plus, Trash } from 'lucide-react';
+import { Check, Plus, Trash, Edit3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface Ingredient {
@@ -18,6 +17,7 @@ interface IngredientItemProps {
   inInventory?: boolean;
   onAdd?: (id: string) => void;
   onRemove?: (id: string) => void;
+  onEdit?: (id: string) => void; // Add onEdit to props
   onSelect?: (id: string) => void;
   selected?: boolean;
 }
@@ -27,6 +27,7 @@ export default function IngredientItem({
   inInventory = false,
   onAdd,
   onRemove,
+  onEdit, // Destructure onEdit
   onSelect,
   selected = false
 }: IngredientItemProps) {
@@ -82,15 +83,29 @@ export default function IngredientItem({
           </Badge>
         )}
         
-        {(onAdd || onRemove) && (
-          <Button 
-            variant={inInventory ? "destructive" : "outline"} 
-            size="icon" 
-            onClick={handleAction}
-            className="h-8 w-8"
-          >
-            {inInventory ? <Trash className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          </Button>
+        {(onAdd || onRemove || onEdit) && (
+          <div className="flex items-center gap-2">
+            {inInventory && onEdit && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={(e) => { e.stopPropagation(); onEdit(ingredient.id); }}
+                className="h-8 w-8"
+              >
+                <Edit3 className="h-4 w-4" /> {/* Assuming Edit3 is imported or use another icon */}
+              </Button>
+            )}
+            {(onAdd || onRemove) && (
+              <Button 
+                variant={inInventory ? "destructive" : "outline"} 
+                size="icon" 
+                onClick={handleAction}
+                className="h-8 w-8"
+              >
+                {inInventory ? <Trash className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -108,3 +108,13 @@ export interface UserData {
   email: string;
   profile: UserProfileData;
 }
+
+export interface InventoryItemData {
+  id: string;
+  name: string;
+  quantity: number; // Backend expects float, ensure conversion from string input
+  unit: string;
+  expiryDate?: string | null; // ISO date string (YYYY-MM-DD)
+  category?: string; // Frontend-specific for now
+  addedDate?: string; // ISO datetime string from backend
+}

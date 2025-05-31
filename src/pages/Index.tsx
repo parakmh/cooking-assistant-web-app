@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,6 +40,7 @@ import IngredientTag from "@/components/IngredientTag"; // IngredientTag compone
 import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector"; // KitchenEquipmentSelector component
 import MealTypeSelector from "@/components/MealTypeSelector"; // MealTypeSelector component
 import { CalendarIcon, Clock, Plus, Search, Upload } from "lucide-react"; // Icons
+import { useAuth } from "@/hooks/useAuth"; // Assuming useAuth hook provides user profile
 
 
 // Categories for filtering
@@ -75,6 +76,7 @@ const kitchenEquipment = [
 
 const Index = () => {
   const { toast } = useToast();
+  const { user } = useAuth(); // Assuming useAuth provides user data including profile
   const [inventory, setInventory] = useState<InventoryItemData[]>([]); // Use InventoryItemData type
   const [isLoadingInventory, setIsLoadingInventory] = useState(true); // Added loading state for inventory
   const [isSubmittingIngredient, setIsSubmittingIngredient] = useState(false); // Added for add ingredient loading
@@ -90,6 +92,7 @@ const Index = () => {
   const [isQuickCooking, setIsQuickCooking] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
+  const navigate = useNavigate();
   
   // New ingredient form state
   const [newIngredient, setNewIngredient] = useState({
@@ -246,28 +249,53 @@ const Index = () => {
     });
   };
   
-  const handleGenerateRecipes = () => {
-    const ingredientsList = ingredientTags.length > 0 ? `${ingredientTags.length} ingredients` : "no specific ingredients";
-    const equipmentInfo = selectedEquipment.length > 0 
-      ? `using ${selectedEquipment.join(', ')}`
-      : "with any kitchen equipment";
-    const timeInfo = isQuickCooking ? "quick cooking time" : "any cooking time";
-    const mealInfo = mealType ? `for ${mealType}` : "for any meal type";
+  const handleGenerateRecipes = async () => { 
+    // apiParams is what we intend to send to the backend.
+    // Optional fields to be omitted are set to 'undefined'.
+    const apiParams: Record<string, string | number | boolean | undefined> = {
+      ingredients: ingredientTags.length > 0 ? ingredientTags.join(',') : "",
+      mealType: mealType || "", 
+      maxPrepTime: isQuickCooking ? "quick" : "any time",
+      kitchenEquipment: selectedEquipment.length > 0 ? selectedEquipment.join(',') : "",
+      page: 1,
+      limit: 10,
+    };
+
+    const definedParams = Object.fromEntries(
+      Object.entries(apiParams).filter(([, value]) => value !== undefined)
+    );
+
+    const queryString = new URLSearchParams(
+      definedParams as Record<string, string> 
+    ).toString();
     
-    const message = `Generated recipes with ${ingredientsList}, ${equipmentInfo}, ${timeInfo}, ${mealInfo}`;
-    
-    toast({
-      title: "Recipes generated",
-      description: message,
-    });
-    
-    // Reset form
-    setIngredientInput("");
-    setIngredientTags([]);
-    setSelectedIngredients([]);
-    setIsQuickCooking(false);
-    setSelectedEquipment(kitchenEquipment.map(tool => tool.id));
-    setMealType("");
+    try {
+      // Call GET /api/recipes endpoint
+      const response = await apiGet<any>(`/recipes?${queryString}`); 
+      
+      toast({
+        title: "Recipe Search Complete",
+        description: "Successfully fetched recipes based on your criteria.",
+      });
+      
+      navigate("/recipe-results", { state: { queryParams: apiParams, results: response } });
+      
+      // Reset form
+      setIngredientInput("");
+      setIngredientTags([]);
+      setSelectedIngredients([]);
+      setIsQuickCooking(false);
+      setSelectedEquipment(kitchenEquipment.map(tool => tool.id)); // Reset equipment selector
+      setMealType("");
+
+    } catch (error: any) {
+      console.error("Failed to fetch recipes:", error);
+      toast({
+        title: "Error Fetching Recipes",
+        description: error.data?.message || "Could not fetch recipes. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleScanReceipt = () => {

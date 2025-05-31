@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, Upload, Trash, X, Search } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Upload, Trash, X, Search, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -303,17 +303,18 @@ const Index = () => {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-white">2. Your Preferences</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/5 p-4 rounded-lg">
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex flex-col items-center">
                     <label className="text-sm font-medium text-white block">Cooking Time</label>
                     <Button
                       variant={isQuickCooking ? "secondary" : "outline"}
                       onClick={() => setIsQuickCooking(!isQuickCooking)}
-                      className="w-full bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange"
+                      className="bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange flex items-center justify-center gap-2 px-4 w-32"
                     >
-                      {isQuickCooking ? "Quick (< 30 mins)" : "Any cooking time"}
+                      <Clock className="h-4 w-4" />
+                      {isQuickCooking ? "Quick" : "Any Time"}
                     </Button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex flex-col items-center">
                     <label className="text-sm font-medium text-white block">Meal Type</label>
                     <MealTypeSelector
                       selectedMealType={mealType}
@@ -326,7 +327,7 @@ const Index = () => {
               {/* Section 3: Kitchen Tools */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-white">3. Kitchen Tools (Optional)</h3>
-                <div className="bg-black/5 p-4 rounded-lg">
+                <div className="bg-black/5 p-4 rounded-lg flex justify-center">
                   <KitchenEquipmentSelector
                     selectedEquipment={selectedEquipment}
                     onEquipmentChange={setSelectedEquipment}

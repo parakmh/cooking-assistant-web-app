@@ -332,7 +332,7 @@ const Index = () => {
 
               {/* Section 3: Kitchen Tools */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">3. Kitchen Tools (Optional)</h3>
+                <h3 className="text-xl font-semibold text-white">3. Kitchen Tools</h3>
                 <div className="bg-black/5 p-4 rounded-lg flex justify-center">
                   <KitchenEquipmentSelector
                     selectedEquipment={selectedEquipment}
@@ -342,12 +342,14 @@ const Index = () => {
               </div>
               
               {/* Generate Button */}
-              <Button 
-                onClick={handleGenerateRecipes}
-                className="w-full bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold py-4 text-xl rounded-lg shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
-              >
-                Find My Perfect Recipe!
-              </Button>
+              <div className="flex justify-center">
+                <Button 
+                  onClick={handleGenerateRecipes}
+                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
+                >
+                  Find My Perfect Recipe!
+                </Button>
+              </div>
             </div>
           </div>
         </div>

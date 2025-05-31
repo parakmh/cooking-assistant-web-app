@@ -104,15 +104,21 @@ const ingredientCategories = [
 
 // Mock kitchen equipment
 const kitchenEquipment = [
-  { id: "1", name: "Blender" },
-  { id: "2", name: "Food Processor" },
-  { id: "3", name: "Stand Mixer" },
-  { id: "4", name: "Pressure Cooker" },
-  { id: "5", name: "Air Fryer" },
-  { id: "6", name: "Slow Cooker" },
-  { id: "7", name: "Deep Fryer" },
-  { id: "8", name: "Grill" },
-  { id: "9", name: "Microwave" },
+  { id: "airfryer", name: "Air Fryer" },
+  { id: "stove", name: "Stove" },
+  { id: "oven", name: "Oven" },
+  // Assuming you might want to add more that correspond to the selector's capabilities
+  // For now, these are the ones defined in KitchenEquipmentSelector.tsx
+  // Add other equipment if they are also managed by KitchenEquipmentSelector
+  // For example, if Blender, Food Processor etc. were to be added to KitchenEquipmentSelector:
+  // { id: "blender", name: "Blender" },
+  // { id: "foodprocessor", name: "Food Processor" },
+  // { id: "standmixer", name: "Stand Mixer" },
+  // { id: "pressurecooker", name: "Pressure Cooker" },
+  // { id: "slowcooker", name: "Slow Cooker" },
+  // { id: "deepfryer", name: "Deep Fryer" },
+  // { id: "grill", name: "Grill" },
+  // { id: "microwave", name: "Microwave" },
 ];
 
 const Index = () => {
@@ -128,7 +134,7 @@ const Index = () => {
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [isQuickCooking, setIsQuickCooking] = useState(false);
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
   
   // New ingredient form state

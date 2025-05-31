@@ -112,6 +112,7 @@ const Inventory = () => {
   });
   
   const handleRemoveIngredient = async (id: string) => {
+    console.log(`Attempting to remove ingredient with ID: ${id}`); // Added log
     try {
       await apiDelete(`/inventory/${id}`);
       setInventory(prevInventory => prevInventory.filter(item => item.id !== id));

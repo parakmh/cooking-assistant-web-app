@@ -83,7 +83,7 @@ Logs out the currently authenticated user (invalidates token if server-side sess
 *   **Response (401 Unauthorized):** No active session or invalid token.
 
 #### `GET /api/auth/me` (Protected)
-Retrieves the profile of the currently authenticated user.
+Retrieves the user information with profile information of the currently authenticated user.
 *   **Response (200 OK):**
     ```json
     {
@@ -204,6 +204,7 @@ Adds a new item to the user's inventory.
     ```json
     {
       "id": "string",
+      "user_id": "string",
       "name": "string",
       "quantity": "number",
       "unit": "string",

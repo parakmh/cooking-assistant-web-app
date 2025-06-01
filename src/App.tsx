@@ -14,6 +14,7 @@ import RegistrationPage from "./pages/RegistrationPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RecipeResults from "./pages/RecipeResults";
+import RecipeDetailsPage from "./pages/RecipeDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -31,9 +32,10 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegistrationPage />} />
+                <Route path="/recipes/:id" element={<RecipeDetailsPage />} />
                 <Route path="/recipes" element={<RecipesHistory />} />
-                <Route path="/recipe-results" element={<RecipeResults />} />
-                
+                <Route path="/recipes/results" element={<RecipeResults />} />
+
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/profile" element={<Profile />} />

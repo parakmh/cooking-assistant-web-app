@@ -118,3 +118,28 @@ export interface InventoryItemData {
   category?: string; // Frontend-specific for now
   addedDate?: string; // ISO datetime string from backend
 }
+
+export interface RecipeSuggestion {
+  id: string;
+  name: string;
+  description?: string;
+  mealType: string[];
+  cuisine: string;
+  prepTimeMinutes: number;
+  cookTimeMinutes: number;
+  servings: number;
+  difficulty: "easy" | "medium" | "hard";
+  averageRating?: number;
+  ratingsCount?: number;
+  imageUrl?: string;
+  ingredients: { name: string; quantity: string; unit: string }[];
+  instructions?: string[];
+  kitchenEquipmentNeeded?: string[];
+  tags?: string[];
+}
+
+export interface RecipeSuggestionsResponse {
+  suggestions: RecipeSuggestion[];
+  message?: string; // Optional message from backend
+  userId?: string;  // Optional userId if backend includes it
+}

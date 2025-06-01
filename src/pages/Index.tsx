@@ -278,7 +278,7 @@ const Index = () => {
         description: "Successfully fetched recipes based on your criteria.",
       });
       
-      navigate("/recipe-results", { state: { queryParams: apiParams, results: response } });
+      navigate("/recipes/results", { state: { queryParams: apiParams, results: response } });
       
       // Reset form
       setIngredientInput("");

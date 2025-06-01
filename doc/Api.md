@@ -83,7 +83,7 @@ Logs out the currently authenticated user (invalidates token if server-side sess
 *   **Response (401 Unauthorized):** No active session or invalid token.
 
 #### `GET /api/auth/me` (Protected)
-Retrieves the profile of the currently authenticated user.
+Retrieves the user information with profile information of the currently authenticated user.
 *   **Response (200 OK):**
     ```json
     {
@@ -204,6 +204,7 @@ Adds a new item to the user's inventory.
     ```json
     {
       "id": "string",
+      "user_id": "string",
       "name": "string",
       "quantity": "number",
       "unit": "string",
@@ -262,46 +263,53 @@ Endpoints for discovering and managing recipes. Some endpoints may be public, wh
 #### `GET /api/recipes`
 Searches and filters recipes.
 *   **Query Parameters (all optional):**
-    *   `q` (string): Search query (keywords for recipe name, description, ingredients).
-    *   `ingredients` (string): Comma-separated list of ingredient names to include.
-    *   `excludeIngredients` (string): Comma-separated list of ingredient names to exclude.
-    *   `mealType` (string): e.g., "Breakfast", "Lunch", "Dinner", "Snack", "Dessert".
-    *   `cuisine` (string): e.g., "Italian", "Mexican", "Indian".
-    *   `difficulty` (string): e.g., "Easy", "Medium", "Hard". (Not for MVP)
-    *   `maxPrepTime` (number): Maximum preparation time in minutes. (Just under 30 mins or not)
-    *   `minRating` (number): Minimum average rating (1-5).
+    *   `ingredients` (string array): Comma-separated list of ingredient names to include.
+    *   `excludeIngredients` (string array): Comma-separated list of ingredient names to exclude. (Expandable feature)
+    *   `kitchenEquipment` (string array): Comma-separated list of equipment IDs, e.g. "airfryer", "oven", "stove".
+    *   `mealType` (string): Filter by a single meal type, e.g., "Breakfast", "Lunch", "Dinner", "Snack", "Dessert".
+    *   `cuisine` (string array): Comma-separated list of cuisine types, e.g., "Italian", "Mexican", "Indian". (Expandable feature)
+    *   `difficulty` (string): e.g., "Easy", "Medium", "Hard". (Future)
+    *   `maxPrepTime` (string): Filter by preparation time. Expected values: "quick" (e.g., under 30 minutes) or "any time".
+    *   `minRating` (number): Minimum average rating (1-5). (Future)
     *   `sortBy` (string): e.g., `rating`, `prepTime`, `name`.
     *   `sortOrder` (string): `asc` or `desc`.
     *   `page` (number): For pagination.
     *   `limit` (number): Items per page.
 *   **Response (200 OK):**
-    ```json
+  ```json
+  {
+    "recipes": [
     {
-      "recipes": [
-        {
-          "id": "string",
-          "name": "string",
-          "description": "string",
-          "mealType": ["string"],
-          "cuisine": "string",
-          "prepTimeMinutes": "number",
-          "cookTimeMinutes": "number",
-          "servings": "number",
-          "difficulty": "string",
-          "averageRating": "number",
-          "imageUrl": "string",
-          "ingredients": [
-            { "name": "string", "quantity": "string", "unit": "string" }
-          ]
-        }
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "mealType": ["string"],
+      "cuisine": "string",
+      "prepTimeMinutes": "number",
+      "cookTimeMinutes": "number",
+      "servings": "number",
+      "difficulty": "string",
+      "averageRating": "number",
+      "ratingsCount": "number",
+      "imageUrl": "string",
+      "ingredients": [
+      { "name": "string", "quantity": "string", "unit": "string", "notes": "string (optional)" }
       ],
-      "pagination": {
-        "currentPage": "number",
-        "totalPages": "number",
-        "totalItems": "number"
-      }
+      "instructions": [
+      "string (step 1)",
+      "string (step 2)"
+      ],
+      "kitchenEquipmentNeeded": ["string"],
+      "tags": ["string"],
     }
-    ```
+    ],
+    "pagination": {
+    "currentPage": "number",
+    "totalPages": "number",
+    "totalItems": "number"
+    }
+  }
+  ```
 
 #### `GET /api/recipes/{recipeId}`
 Retrieves details for a specific recipe.

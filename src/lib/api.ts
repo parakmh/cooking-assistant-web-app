@@ -2,7 +2,7 @@ const getApiBaseUrl = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   if (!baseUrl) {
     console.error("VITE_API_BASE_URL is not defined in .env file");
-    return "http://127.0.0.1:5000/api"; // Fallback, though it should be set
+    return "http://127.0.0.1:8000/api"
   }
   return baseUrl;
 };
@@ -100,6 +100,11 @@ export interface UserProfileData {
   bio?: string;
   profilePicture?: string; // URL
   kitchenEquipment: string[];
+  notifyExpiringIngredients: boolean;
+  notifyWeeklyMealPlan: boolean;
+  notifyNewRecipes: boolean;
+  notifyCookingTips: boolean;
+  mealPlanFrequency: string;
 }
 
 export interface UserData {

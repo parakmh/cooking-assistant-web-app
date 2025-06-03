@@ -109,11 +109,7 @@ const Index = () => {
       setIsLoadingInventory(true);
       try {
         const data = await apiGet<{items: InventoryItemData[]}>("/inventory");
-        const itemsWithCategory = (data.items || []).map(item => ({
-          ...item,
-          category: item.category || "Pantry" // Default to Pantry if not present
-        }));
-        setInventory(itemsWithCategory);
+        setInventory(data.items || []);
       } catch (error: any) {
         console.error("Failed to fetch inventory for landing page:", error);
         toast({
@@ -195,17 +191,12 @@ const Index = () => {
       quantity: parseFloat(newIngredient.quantity) || 0,
       unit: newIngredient.unit,
       category: newIngredient.category,
-      expiry_date: newIngredient.expiryDate ? format(newIngredient.expiryDate, "yyyy-MM-dd") : null
+      expiryDate: newIngredient.expiryDate ? format(newIngredient.expiryDate, "yyyy-MM-dd") : null
     };
     
     try {
       const addedItem = await apiPost<InventoryItemData>("/inventory", payload);
-      // Ensure category is present, default if not
-      const newItemWithCategory = {
-        ...addedItem,
-        category: addedItem.category || "Pantry" 
-      };
-      setInventory(prevInventory => [...prevInventory, newItemWithCategory]);
+      setInventory(prevInventory => [...prevInventory, addedItem]);
       setIsAddDialogOpen(false);
       setNewIngredient({
         name: "",

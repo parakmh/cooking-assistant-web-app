@@ -59,17 +59,15 @@ const Profile = () => {
     bio: "",
     profilePicture: "",
     kitchenEquipment: [],
+    notifyExpiringIngredients: true,
+    notifyWeeklyMealPlan: true,
+    notifyNewRecipes: false,
+    notifyCookingTips: true,
+    mealPlanFrequency: "weekly",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // States for notification preferences (UI only for now)
-  const [notifyExpiringIngredients, setNotifyExpiringIngredients] = useState(true);
-  const [notifyWeeklyMealPlan, setNotifyWeeklyMealPlan] = useState(true);
-  const [notifyNewRecipes, setNotifyNewRecipes] = useState(false);
-  const [notifyCookingTips, setNotifyCookingTips] = useState(true);
-  const [mealPlanFrequency, setMealPlanFrequency] = useState("weekly");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -78,15 +76,21 @@ const Profile = () => {
       try {
         const data = await apiGet<UserData>("/auth/me");
         setUserData(data);
-        // Ensure profileData is initialized even if data.profile is null/undefined
-        setProfileData(data.profile || {
-          dietaryPreferences: [],
-          allergies: [],
-          cookingExpertise: "Beginner",
-          cuisinePreferences: [],
-          bio: "",
-          profilePicture: "",
-          kitchenEquipment: [],
+        // Initialize profileData from GET /auth/me (keys already camelCase)
+        const profileFromBackend = data.profile || {};
+        setProfileData({
+          dietaryPreferences: profileFromBackend.dietary_preferences || [],
+          allergies: profileFromBackend.allergies || [],
+          cookingExpertise: profileFromBackend.cooking_expertise || "Beginner",
+          cuisinePreferences: profileFromBackend.cuisine_preferences || [],
+          bio: profileFromBackend.bio || "",
+          profilePicture: profileFromBackend.profile_picture || "",
+          kitchenEquipment: profileFromBackend.kitchen_equipment || [],
+          notifyExpiringIngredients: profileFromBackend.notify_expiring_ingredients ?? true,
+          notifyWeeklyMealPlan: profileFromBackend.notify_weekly_meal_plan ?? true,
+          notifyNewRecipes: profileFromBackend.notify_new_recipes ?? false,
+          notifyCookingTips: profileFromBackend.notify_cooking_tips ?? true,
+          mealPlanFrequency: profileFromBackend.meal_plan_frequency || "weekly",
         });
       } catch (err: any) {
         console.error("Failed to fetch user data:", err);
@@ -124,18 +128,37 @@ const Profile = () => {
     setIsSaving(true);
     setError(null);
     try {
-      // Ensure all fields are present, even if empty arrays, as per UserProfileData
-      const payload: UserProfileData = {
-        dietaryPreferences: profileData.dietaryPreferences || [],
-        allergies: profileData.allergies || [],
-        cookingExpertise: profileData.cookingExpertise || "Beginner",
-        cuisinePreferences: profileData.cuisinePreferences || [],
-        bio: profileData.bio || "",
-        profilePicture: profileData.profilePicture || "",
-        kitchenEquipment: profileData.kitchenEquipment || [],
+      // Map camelCase to snake_case for backend
+      const snakePayload = {
+        dietary_preferences: profileData.dietaryPreferences,
+        allergies: profileData.allergies,
+        cooking_expertise: profileData.cookingExpertise,
+        cuisine_preferences: profileData.cuisinePreferences,
+        bio: profileData.bio,
+        profile_picture: profileData.profilePicture,
+        kitchen_equipment: profileData.kitchenEquipment,
+        notify_expiring_ingredients: profileData.notifyExpiringIngredients,
+        notify_weekly_meal_plan: profileData.notifyWeeklyMealPlan,
+        notify_new_recipes: profileData.notifyNewRecipes,
+        notify_cooking_tips: profileData.notifyCookingTips,
+        meal_plan_frequency: profileData.mealPlanFrequency,
       };
-      const response = await apiPut<{ message: string, profile: UserProfileData }>("/users/profile", payload);
-      setProfileData(response.profile);
+      // Save preferences and map response back to camelCase
+      const resp = await apiPut<any>("/users/profile", snakePayload);
+      setProfileData({
+        dietaryPreferences: resp.dietary_preferences || [],
+        allergies: resp.allergies || [],
+        cookingExpertise: resp.cooking_expertise || "Beginner",
+        cuisinePreferences: resp.cuisine_preferences || [],
+        bio: resp.bio || "",
+        profilePicture: resp.profile_picture || "",
+        kitchenEquipment: resp.kitchen_equipment || [],
+        notifyExpiringIngredients: resp.notify_expiring_ingredients ?? true,
+        notifyWeeklyMealPlan: resp.notify_weekly_meal_plan ?? true,
+        notifyNewRecipes: resp.notify_new_recipes ?? false,
+        notifyCookingTips: resp.notify_cooking_tips ?? true,
+        mealPlanFrequency: resp.meal_plan_frequency || "weekly",
+      });
       toast({
         title: "Preferences Saved",
         description: "Your preferences have been updated successfully.",
@@ -157,21 +180,39 @@ const Profile = () => {
     setIsSaving(true);
     setError(null);
     
-    const dataToUpdate: Partial<UserProfileData> = {
-        bio: profileData.bio,
-        profilePicture: profileData.profilePicture,
-        // Include other fields from profileData if they are managed in this form
-        // and are part of the UserProfileData model.
-        dietaryPreferences: profileData.dietaryPreferences,
-        allergies: profileData.allergies,
-        cookingExpertise: profileData.cookingExpertise,
-        cuisinePreferences: profileData.cuisinePreferences,
-        kitchenEquipment: profileData.kitchenEquipment,
+    // Map camelCase to snake_case for backend
+    const snakePayload = {
+      bio: profileData.bio,
+      profile_picture: profileData.profilePicture,
+      dietary_preferences: profileData.dietaryPreferences,
+      allergies: profileData.allergies,
+      cooking_expertise: profileData.cookingExpertise,
+      cuisine_preferences: profileData.cuisinePreferences,
+      kitchen_equipment: profileData.kitchenEquipment,
+      notify_expiring_ingredients: profileData.notifyExpiringIngredients,
+      notify_weekly_meal_plan: profileData.notifyWeeklyMealPlan,
+      notify_new_recipes: profileData.notifyNewRecipes,
+      notify_cooking_tips: profileData.notifyCookingTips,
+      meal_plan_frequency: profileData.mealPlanFrequency,
     };
 
     try {
-      const response = await apiPut<{ message: string, profile: UserProfileData }>("/users/profile", dataToUpdate);
-      setProfileData(response.profile);
+      // Save account info and map response back to camelCase
+      const resp = await apiPut<any>("/users/profile", snakePayload);
+      setProfileData({
+        dietaryPreferences: resp.dietary_preferences || [],
+        allergies: resp.allergies || [],
+        cookingExpertise: resp.cooking_expertise || "Beginner",
+        cuisinePreferences: resp.cuisine_preferences || [],
+        bio: resp.bio || "",
+        profilePicture: resp.profile_picture || "",
+        kitchenEquipment: resp.kitchen_equipment || [],
+        notifyExpiringIngredients: resp.notify_expiring_ingredients ?? true,
+        notifyWeeklyMealPlan: resp.notify_weekly_meal_plan ?? true,
+        notifyNewRecipes: resp.notify_new_recipes ?? false,
+        notifyCookingTips: resp.notify_cooking_tips ?? true,
+        mealPlanFrequency: resp.meal_plan_frequency || "weekly",
+      });
       toast({
         title: "Account Info Saved",
         description: "Your account information has been updated.",
@@ -182,6 +223,58 @@ const Profile = () => {
       toast({
         title: "Error Saving Account Info",
         description: err.data?.message || "Could not save account information.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setIsSaving(true);
+    setError(null);
+    try {
+      // Map camelCase to snake_case for backend  
+      const snakePayload = {
+        dietary_preferences: profileData.dietaryPreferences,
+        allergies: profileData.allergies,
+        cooking_expertise: profileData.cookingExpertise,
+        cuisine_preferences: profileData.cuisinePreferences,
+        bio: profileData.bio,
+        profile_picture: profileData.profilePicture,
+        kitchen_equipment: profileData.kitchenEquipment,
+        notify_expiring_ingredients: profileData.notifyExpiringIngredients,
+        notify_weekly_meal_plan: profileData.notifyWeeklyMealPlan,
+        notify_new_recipes: profileData.notifyNewRecipes,
+        notify_cooking_tips: profileData.notifyCookingTips,
+        meal_plan_frequency: profileData.mealPlanFrequency,
+      };
+      // Save notification settings and map response back to camelCase
+      const resp = await apiPut<any>("/users/profile", snakePayload);
+      setProfileData({
+        dietaryPreferences: resp.dietary_preferences || [],
+        allergies: resp.allergies || [],
+        cookingExpertise: resp.cooking_expertise || "Beginner",
+        cuisinePreferences: resp.cuisine_preferences || [],
+        bio: resp.bio || "",
+        profilePicture: resp.profile_picture || "",
+        kitchenEquipment: resp.kitchen_equipment || [],
+        notifyExpiringIngredients: resp.notify_expiring_ingredients ?? true,
+        notifyWeeklyMealPlan: resp.notify_weekly_meal_plan ?? true,
+        notifyNewRecipes: resp.notify_new_recipes ?? false,
+        notifyCookingTips: resp.notify_cooking_tips ?? true,
+        mealPlanFrequency: resp.meal_plan_frequency || "weekly",
+      });
+      toast({
+        title: "Notification Settings Saved",
+        description: "Your notification preferences have been updated.",
+      });
+    } catch (err: any) {
+      console.error("Failed to save notification settings:", err);
+      setError(err.data?.message || "Failed to save notification settings.");
+      toast({
+        title: "Error Saving Notification Settings",
+        description: err.data?.message || "Could not save your notification settings.",
         variant: "destructive",
       });
     } finally {
@@ -488,7 +581,7 @@ const Profile = () => {
                 <CardHeader>
                   <CardTitle>Notification Settings</CardTitle>
                   <CardDescription>
-                    Customize when and how you receive notifications. (UI Only - Not Saved)
+                    Customize when and how you receive notifications.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
@@ -499,8 +592,8 @@ const Profile = () => {
                     </div>
                     <Switch
                       id="notify-expiring-ingredients"
-                      checked={notifyExpiringIngredients}
-                      onCheckedChange={setNotifyExpiringIngredients}
+                      checked={profileData.notifyExpiringIngredients}
+                      onCheckedChange={(checked) => handleProfileInputChange('notifyExpiringIngredients', checked)}
                     />
                   </div>
 
@@ -511,8 +604,8 @@ const Profile = () => {
                     </div>
                     <Switch
                       id="notify-weekly-meal-plan"
-                      checked={notifyWeeklyMealPlan}
-                      onCheckedChange={setNotifyWeeklyMealPlan}
+                      checked={profileData.notifyWeeklyMealPlan}
+                      onCheckedChange={(checked) => handleProfileInputChange('notifyWeeklyMealPlan', checked)}
                     />
                   </div>
 
@@ -523,8 +616,8 @@ const Profile = () => {
                     </div>
                     <Switch
                       id="notify-new-recipes"
-                      checked={notifyNewRecipes}
-                      onCheckedChange={setNotifyNewRecipes}
+                      checked={profileData.notifyNewRecipes}
+                      onCheckedChange={(checked) => handleProfileInputChange('notifyNewRecipes', checked)}
                     />
                   </div>
 
@@ -535,8 +628,8 @@ const Profile = () => {
                     </div>
                     <Switch
                       id="notify-cooking-tips"
-                      checked={notifyCookingTips}
-                      onCheckedChange={setNotifyCookingTips}
+                      checked={profileData.notifyCookingTips}
+                      onCheckedChange={(checked) => handleProfileInputChange('notifyCookingTips', checked)}
                     />
                   </div>
                   
@@ -544,7 +637,7 @@ const Profile = () => {
                     <div>
                       <Label htmlFor="meal-plan-frequency" className="font-semibold">Meal Plan Frequency</Label>
                     </div>
-                    <Select value={mealPlanFrequency} onValueChange={setMealPlanFrequency}>
+                    <Select value={profileData.mealPlanFrequency} onValueChange={(value) => handleProfileInputChange('mealPlanFrequency', value)}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Select frequency" />
                       </SelectTrigger>
@@ -559,7 +652,8 @@ const Profile = () => {
 
                 </CardContent>
                 <CardFooter>
-                  <Button disabled className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+                  <Button onClick={handleSaveNotifications} disabled={isSaving || isLoading} className="w-full sm:w-auto">
+                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Save Notification Settings
                   </Button>
                 </CardFooter>

@@ -19,4 +19,14 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      // disable generating sourcemaps for dependencies to suppress missing source warnings
+      sourcemap: false
+    }
+  },
+  build: {
+    // disable production sourcemap generation
+    sourcemap: false
+  },
 }));

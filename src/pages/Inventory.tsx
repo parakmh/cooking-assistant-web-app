@@ -151,7 +151,7 @@ const Inventory = () => {
       quantity: quantityAsNumber,
       unit: newIngredient.unit,
       expiryDate: newIngredient.expiryDate ? format(newIngredient.expiryDate, "yyyy-MM-dd") : null,
-      // category is not sent to backend as it's not in InventoryItem model
+      category: newIngredient.category,
     };
 
     setIsSubmitting(true);
@@ -160,7 +160,7 @@ const Inventory = () => {
       // The backend might not return 'category', so we add it client-side if needed for display
       // or ensure InventoryItemData from api.ts matches backend strictly.
       // For now, assuming addedItem matches InventoryItemData.
-      setInventory(prevInventory => [...prevInventory, { ...addedItem, category: newIngredient.category }]);
+      setInventory(prevInventory => [...prevInventory, addedItem]);
       setIsAddDialogOpen(false);
       setNewIngredient(initialNewIngredientState);
       toast({
@@ -208,7 +208,7 @@ const Inventory = () => {
       quantity: quantityAsNumber,
       unit: editingItem.unit,
       expiryDate: editingItem.expiryDate ? format(editingItem.expiryDate, "yyyy-MM-dd") : null,
-      // category is not sent
+      category: editingItem.category,
     };
     
     setIsSubmitting(true);
@@ -216,7 +216,7 @@ const Inventory = () => {
       const updatedItem = await apiPut<InventoryItemData>(`/inventory/${editingItem.id}`, payload);
       setInventory(prevInventory => 
         prevInventory.map(invItem => 
-          invItem.id === updatedItem.id ? { ...updatedItem, category: editingItem.category } : invItem
+          invItem.id === updatedItem.id ? updatedItem : invItem
         )
       );
       setIsEditDialogOpen(false);

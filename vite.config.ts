@@ -19,6 +19,12 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Vitest config for browser-like environment
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setupTests.ts'],
+  },
   optimizeDeps: {
     esbuildOptions: {
       // disable generating sourcemaps for dependencies to suppress missing source warnings

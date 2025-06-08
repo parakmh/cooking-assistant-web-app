@@ -79,6 +79,26 @@ export const apiCall = async <T = any>(
   }
 };
 
+export const getBackendDomain = (): string => {
+  const apiBaseUrl = getApiBaseUrl(); // e.g., http://127.0.0.1:8000/api
+  try {
+    const url = new URL(apiBaseUrl);
+    return url.origin; // e.g., http://127.0.0.1:8000
+  } catch (error) {
+    console.error("Error parsing VITE_API_BASE_URL to get origin:", error);
+    // Fallback for the default scenario
+    if (apiBaseUrl.includes("127.0.0.1:8000/api")) {
+        return "http://127.0.0.1:8000";
+    }
+    // Attempt to remove '/api' if present, as a more general fallback
+    if (apiBaseUrl.endsWith('/api')) {
+      return apiBaseUrl.slice(0, -4);
+    }
+    // If VITE_API_BASE_URL is just the domain, or if parsing fails unexpectedly
+    return apiBaseUrl.replace(/\/api$/, ''); // Corrected regex
+  }
+};
+
 // Example helper functions for common methods
 export const apiGet = <T = any>(endpoint: string, needsAuth: boolean = true) =>
   apiCall<T>(endpoint, { method: 'GET', needsAuth });

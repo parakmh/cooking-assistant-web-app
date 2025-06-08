@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import RecipeCard from '@/components/RecipeCard'; // Import RecipeCard
-import { RecipeSuggestion } from '@/lib/api'; // Import the RecipeSuggestion interface
+import { RecipeSuggestion, getBackendDomain } from '@/lib/api';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Clock, Users } from 'lucide-react';
 interface RecipeCardRecipe {
   id: string;
   title: string;
-  image: string;
+  imageUrl: string;
   cookTime: string;
   servings: number;
   difficulty: "easy" | "medium" | "hard";
@@ -29,7 +29,7 @@ interface RecipeCardRecipe {
 const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): RecipeCardRecipe => ({
   id: suggestion.id,
   title: suggestion.name,
-  image: suggestion.imageUrl || '/placeholder.svg', // Fallback image
+  imageUrl: suggestion.imageUrl || '/placeholder.svg',
   cookTime: `${(suggestion.prepTimeMinutes || 0) + (suggestion.cookTimeMinutes || 0)} mins`,
   servings: suggestion.servings,
   difficulty: suggestion.difficulty.toLowerCase() as "easy" | "medium" | "hard", // Ensure lowercase and type assertion
@@ -113,7 +113,7 @@ const RecipeResults = () => {
                 </DialogDescription>
               </DialogHeader>
               <img
-                src={selectedRecipe.imageUrl || '/placeholder.svg'}
+                src={selectedRecipe.imageUrl && selectedRecipe.imageUrl.startsWith('/') ? `${getBackendDomain()}${selectedRecipe.imageUrl}` : (selectedRecipe.imageUrl || '/placeholder.svg')}
                 alt={selectedRecipe.name}
                 className="w-full h-64 object-cover rounded-lg mb-6"
               />

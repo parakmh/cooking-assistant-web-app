@@ -1,12 +1,12 @@
-
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, User } from "lucide-react";
+import { getBackendDomain } from "@/lib/api";
 
 interface Recipe {
   id: string;
   title: string;
-  image: string;
+  imageUrl: string;
   cookTime: string;
   servings: number;
   difficulty: "easy" | "medium" | "hard";
@@ -36,13 +36,25 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
     medium: "bg-yellow-100 text-yellow-800",
     hard: "bg-red-100 text-red-800"
   };
+
+  // Determine the image source safely
+  let imageSrc = '/placeholder.svg';
+  if (recipe.imageUrl && typeof recipe.imageUrl === 'string') {
+    if (recipe.imageUrl.startsWith('/')) {
+      imageSrc = `${getBackendDomain()}${recipe.imageUrl}`;
+    } else {
+      imageSrc = recipe.imageUrl;
+    }
+  }
+  // Log the final image source being used
+  console.log(`Recipe: "${recipe.title}", Original imageUrl: "${recipe.imageUrl}", Processed imageSrc: "${imageSrc}"`);
   
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
       <div className="relative h-48 overflow-hidden">
         <img
-          src={recipe.image}
-          alt={recipe.title}
+          src={imageSrc}
+          alt={recipe.title || 'Recipe image'}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-2 right-2 flex flex-col gap-2">

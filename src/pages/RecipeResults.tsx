@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import RecipeCard from '@/components/RecipeCard'; // Import RecipeCard
-import { RecipeSuggestion } from '@/lib/api'; // Import the RecipeSuggestion interface
+import { RecipeSuggestion, getBackendDomain } from '@/lib/api';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Clock, Users } from 'lucide-react';
 interface RecipeCardRecipe {
   id: string;
   title: string;
-  image: string;
+  imageUrl: string;
   cookTime: string;
   servings: number;
   difficulty: "easy" | "medium" | "hard";
@@ -29,7 +29,7 @@ interface RecipeCardRecipe {
 const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): RecipeCardRecipe => ({
   id: suggestion.id,
   title: suggestion.name,
-  image: suggestion.imageUrl || '/placeholder.svg', // Fallback image
+  imageUrl: suggestion.imageUrl || '/placeholder.svg',
   cookTime: `${(suggestion.prepTimeMinutes || 0) + (suggestion.cookTimeMinutes || 0)} mins`,
   servings: suggestion.servings,
   difficulty: suggestion.difficulty.toLowerCase() as "easy" | "medium" | "hard", // Ensure lowercase and type assertion
@@ -64,15 +64,16 @@ const RecipeResults = () => {
       {recipesFromSearch.length > 0 && (
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Matching Recipes</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {/* You'll need a similar transformer for recipesFromSearch if their structure differs from RecipeCardRecipe */}
-            {/* For now, assuming they might be similar or you'll adapt RecipeCard or the data */}
+          {/* Changed from grid to flexbox for better centering of wrapped items */}
+          <div className="flex flex-wrap justify-center -mx-3">
             {recipesFromSearch.map((recipe: any) => (
-              <RecipeCard 
-                key={recipe.id} 
-                recipe={transformSuggestionToRecipeCardProps(recipe as RecipeSuggestion)} // Adapt as needed
-                onView={() => handleViewRecipe(recipe as RecipeSuggestion)}
-              />
+              // Added a wrapper div for width control and padding, moved key here
+              <div key={recipe.id} className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 p-3">
+                <RecipeCard
+                  recipe={transformSuggestionToRecipeCardProps(recipe as RecipeSuggestion)} // Adapt as needed
+                  onView={() => handleViewRecipe(recipe as RecipeSuggestion)}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -82,13 +83,16 @@ const RecipeResults = () => {
       {suggestions.length > 0 && (
         <div>
           <h2 className="text-2xl font-semibold mb-4">Suggested For You</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Changed from grid to flexbox for better centering of wrapped items */}
+          <div className="flex flex-wrap justify-center -mx-3"> 
             {suggestions.map(suggestion => (
-              <RecipeCard 
-                key={suggestion.id} 
-                recipe={transformSuggestionToRecipeCardProps(suggestion)} 
-                onView={() => handleViewRecipe(suggestion)}
-              />
+              // Added a wrapper div for width control and padding, moved key here
+              <div key={suggestion.id} className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 p-3">
+                <RecipeCard 
+                  recipe={transformSuggestionToRecipeCardProps(suggestion)} 
+                  onView={() => handleViewRecipe(suggestion)}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -113,7 +117,7 @@ const RecipeResults = () => {
                 </DialogDescription>
               </DialogHeader>
               <img
-                src={selectedRecipe.imageUrl || '/placeholder.svg'}
+                src={selectedRecipe.imageUrl && selectedRecipe.imageUrl.startsWith('/') ? `${getBackendDomain()}${selectedRecipe.imageUrl}` : (selectedRecipe.imageUrl || '/placeholder.svg')}
                 alt={selectedRecipe.name}
                 className="w-full h-64 object-cover rounded-lg mb-6"
               />

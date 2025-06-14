@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -65,6 +64,8 @@ export default {
 				},
 				// Custom colors for our app
 				'kitchen-green': '#4CAF50',
+				'kitchen-green-dark': '#388E3C',
+				'kitchen-green-darker': '#2E7D32',
 				'kitchen-orange': '#FF9800',
 				'kitchen-teal': '#009688',
 				'kitchen-light': '#F5F5F5',

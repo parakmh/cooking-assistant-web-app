@@ -1,4 +1,3 @@
-
 import { useState, KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, Upload, Trash, X, Search } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Upload, Trash, X, Search, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -105,15 +104,21 @@ const ingredientCategories = [
 
 // Mock kitchen equipment
 const kitchenEquipment = [
-  { id: "1", name: "Blender" },
-  { id: "2", name: "Food Processor" },
-  { id: "3", name: "Stand Mixer" },
-  { id: "4", name: "Pressure Cooker" },
-  { id: "5", name: "Air Fryer" },
-  { id: "6", name: "Slow Cooker" },
-  { id: "7", name: "Deep Fryer" },
-  { id: "8", name: "Grill" },
-  { id: "9", name: "Microwave" },
+  { id: "airfryer", name: "Air Fryer" },
+  { id: "stove", name: "Stove" },
+  { id: "oven", name: "Oven" },
+  // Assuming you might want to add more that correspond to the selector's capabilities
+  // For now, these are the ones defined in KitchenEquipmentSelector.tsx
+  // Add other equipment if they are also managed by KitchenEquipmentSelector
+  // For example, if Blender, Food Processor etc. were to be added to KitchenEquipmentSelector:
+  // { id: "blender", name: "Blender" },
+  // { id: "foodprocessor", name: "Food Processor" },
+  // { id: "standmixer", name: "Stand Mixer" },
+  // { id: "pressurecooker", name: "Pressure Cooker" },
+  // { id: "slowcooker", name: "Slow Cooker" },
+  // { id: "deepfryer", name: "Deep Fryer" },
+  // { id: "grill", name: "Grill" },
+  // { id: "microwave", name: "Microwave" },
 ];
 
 const Index = () => {
@@ -129,7 +134,7 @@ const Index = () => {
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [isQuickCooking, setIsQuickCooking] = useState(false);
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
   
   // New ingredient form state
@@ -249,7 +254,7 @@ const Index = () => {
     setIngredientTags([]);
     setSelectedIngredients([]);
     setIsQuickCooking(false);
-    setSelectedEquipment([]);
+    setSelectedEquipment(kitchenEquipment.map(tool => tool.id));
     setMealType("");
   };
   
@@ -273,51 +278,62 @@ const Index = () => {
             </p>
             
             {/* Recipe Generation Form */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-6">
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-left block">Enter your ingredients</label>
-                <Input 
-                  placeholder="Type ingredient and press Enter or comma..."
-                  value={ingredientInput}
-                  onChange={(e) => setIngredientInput(e.target.value)}
-                  onKeyDown={handleIngredientInputKeyDown}
-                  className="bg-white/90 text-kitchen-dark"
-                />
-                {ingredientTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {ingredientTags.map((ingredient, index) => (
-                      <IngredientTag
-                        key={index}
-                        ingredient={ingredient}
-                        onRemove={() => removeIngredientTag(ingredient)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Cooking Time</label>
-                  <Button
-                    variant={isQuickCooking ? "secondary" : "outline"}
-                    onClick={() => setIsQuickCooking(!isQuickCooking)}
-                    className="w-full bg-white/90 text-kitchen-dark hover:bg-white/80"
-                  >
-                    {isQuickCooking ? "Quick (< 30 mins)" : "Any cooking time"}
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Meal Type</label>
-                  <MealTypeSelector
-                    selectedMealType={mealType}
-                    onMealTypeChange={setMealType}
+            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-8 text-left">
+
+              {/* Section 1: Ingredients */}
+              <div className="bg-black/5 p-4 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold text-white">1. What do you have?</h3>
+                <div className="bg-black/5 p-4 rounded-lg">
+                  <Input 
+                    placeholder="Type ingredient and press Enter or comma..."
+                    value={ingredientInput}
+                    onChange={(e) => setIngredientInput(e.target.value)}
+                    onKeyDown={handleIngredientInputKeyDown}
+                    className="bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange"
                   />
+                  {ingredientTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {ingredientTags.map((ingredient, index) => (
+                        <IngredientTag
+                          key={index}
+                          ingredient={ingredient}
+                          onRemove={() => removeIngredientTag(ingredient)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Kitchen Equipment</label>
+              </div>
+
+              {/* Section 2: Preferences */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-white">2. Your Preferences</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/5 p-4 rounded-lg">
+                  <div className="space-y-2 flex flex-col items-center">
+                    <label className="text-sm font-medium text-white block">Cooking Time</label>
+                    <Button
+                      variant={isQuickCooking ? "secondary" : "outline"}
+                      onClick={() => setIsQuickCooking(!isQuickCooking)}
+                      className="bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange flex items-center justify-center gap-2 px-4 w-32"
+                    >
+                      <Clock className="h-4 w-4" />
+                      {isQuickCooking ? "Quick" : "Any Time"}
+                    </Button>
+                  </div>
+                  <div className="space-y-2 flex flex-col items-center">
+                    <label className="text-sm font-medium text-white block">Meal Type</label>
+                    <MealTypeSelector
+                      selectedMealType={mealType}
+                      onMealTypeChange={setMealType}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Kitchen Equipment */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-white">3. Kitchen Equipment</h3>
+                <div className="bg-black/5 p-4 rounded-lg flex justify-center">
                   <KitchenEquipmentSelector
                     selectedEquipment={selectedEquipment}
                     onEquipmentChange={setSelectedEquipment}
@@ -325,12 +341,15 @@ const Index = () => {
                 </div>
               </div>
               
-              <Button 
-                onClick={handleGenerateRecipes}
-                className="w-full bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-semibold py-3 text-lg"
-              >
-                Suggest me a recipe!
-              </Button>
+              {/* Generate Button */}
+              <div className="flex justify-center">
+                <Button 
+                  onClick={handleGenerateRecipes}
+                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
+                >
+                  Find My Perfect Recipe!
+                </Button>
+              </div>
             </div>
           </div>
         </div>

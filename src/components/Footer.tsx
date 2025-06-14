@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="kitchen-container py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-kitchen-green">Thanasis</h3>
+            <h3 className="text-lg font-bold text-kitchen-green">KitchenAI Assistant</h3>
             <p className="text-sm text-muted-foreground">
               Your AI-powered kitchen companion that helps you cook smarter, reduce waste, and discover amazing recipes.
             </p>

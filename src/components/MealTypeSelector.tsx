@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Coffee, Sun, Moon, Cookie } from "lucide-react";
 
@@ -23,7 +22,7 @@ const MealTypeSelector = ({ selectedMealType, onMealTypeChange }: MealTypeSelect
           variant={selectedMealType === mealType.id ? "default" : "outline"}
           size="icon"
           onClick={() => onMealTypeChange(selectedMealType === mealType.id ? "" : mealType.id)}
-          className="h-12 w-12 bg-white/90 text-kitchen-dark hover:bg-white/80"
+          className={`h-12 w-12 text-kitchen-dark transition-all duration-150 ease-in-out transform hover:scale-110 ${selectedMealType === mealType.id ? 'bg-kitchen-green-dark text-white ring-2 ring-kitchen-green-darker' : 'bg-white/90 hover:bg-white/80 border-white/30'}`}
         >
           <mealType.icon className="h-6 w-6" />
         </Button>

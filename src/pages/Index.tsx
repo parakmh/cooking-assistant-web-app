@@ -1,6 +1,5 @@
-
-import { useState, KeyboardEvent } from "react";
-import { Link } from "react-router-dom";
+import { useState, KeyboardEvent, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,14 +9,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, Upload, Trash, X, Search } from "lucide-react";
+import { apiGet, apiPost, apiDelete, InventoryItemData } from "@/lib/api"; // Added apiPost, apiDelete
+import { useToast } from "@/components/ui/use-toast"; // Ensure useToast is imported
+import { format } from "date-fns"; // For formatting date
+import { cn } from "@/lib/utils"; // For conditional classes
+import { Calendar } from "@/components/ui/calendar"; // Calendar component
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"; // Popover components
+import { Label } from "@/components/ui/label"; // Label component
 import {
   Dialog,
   DialogContent,
@@ -26,70 +28,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"; // Dialog components
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs";
-import IngredientItem from "@/components/IngredientItem";
-import IngredientTag from "@/components/IngredientTag";
-import MealTypeSelector from "@/components/MealTypeSelector";
-import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector";
-import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/tabs"; // Tabs components
+import IngredientItem from "@/components/IngredientItem"; // IngredientItem component
+import IngredientTag from "@/components/IngredientTag"; // IngredientTag component
+import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector"; // KitchenEquipmentSelector component
+import MealTypeSelector from "@/components/MealTypeSelector"; // MealTypeSelector component
+import { CalendarIcon, Clock, Plus, Search, Upload } from "lucide-react"; // Icons
+import { useAuth } from "@/hooks/useAuth"; // Assuming useAuth hook provides user profile
 
-// Mock inventory data
-const mockInventory = [
-  {
-    id: "1",
-    name: "Chicken breast",
-    quantity: "1",
-    unit: "kg",
-    expiryDate: "2025-05-20",
-    category: "Protein"
-  },
-  {
-    id: "2",
-    name: "Spinach",
-    quantity: "500",
-    unit: "g",
-    expiryDate: "2025-05-14",
-    category: "Vegetables"
-  },
-  {
-    id: "3",
-    name: "Brown rice",
-    quantity: "2",
-    unit: "kg",
-    category: "Grains"
-  },
-  {
-    id: "4",
-    name: "Eggs",
-    quantity: "12",
-    unit: "pcs",
-    expiryDate: "2025-05-25",
-    category: "Dairy"
-  },
-  {
-    id: "5",
-    name: "Greek yogurt",
-    quantity: "500",
-    unit: "g",
-    expiryDate: "2025-05-16",
-    category: "Dairy"
-  },
-  {
-    id: "6",
-    name: "Tomatoes",
-    quantity: "6",
-    unit: "pcs",
-    expiryDate: "2025-05-18",
-    category: "Vegetables"
-  }
-];
 
 // Categories for filtering
 const ingredientCategories = [
@@ -105,20 +57,29 @@ const ingredientCategories = [
 
 // Mock kitchen equipment
 const kitchenEquipment = [
-  { id: "1", name: "Blender" },
-  { id: "2", name: "Food Processor" },
-  { id: "3", name: "Stand Mixer" },
-  { id: "4", name: "Pressure Cooker" },
-  { id: "5", name: "Air Fryer" },
-  { id: "6", name: "Slow Cooker" },
-  { id: "7", name: "Deep Fryer" },
-  { id: "8", name: "Grill" },
-  { id: "9", name: "Microwave" },
+  { id: "airfryer", name: "Air Fryer" },
+  { id: "stove", name: "Stove" },
+  { id: "oven", name: "Oven" },
+  // Assuming you might want to add more that correspond to the selector's capabilities
+  // For now, these are the ones defined in KitchenEquipmentSelector.tsx
+  // Add other equipment if they are also managed by KitchenEquipmentSelector
+  // For example, if Blender, Food Processor etc. were to be added to KitchenEquipmentSelector:
+  // { id: "blender", name: "Blender" },
+  // { id: "foodprocessor", name: "Food Processor" },
+  // { id: "standmixer", name: "Stand Mixer" },
+  // { id: "pressurecooker", name: "Pressure Cooker" },
+  // { id: "slowcooker", name: "Slow Cooker" },
+  // { id: "deepfryer", name: "Deep Fryer" },
+  // { id: "grill", name: "Grill" },
+  // { id: "microwave", name: "Microwave" },
 ];
 
 const Index = () => {
   const { toast } = useToast();
-  const [inventory, setInventory] = useState(mockInventory);
+  const { user } = useAuth(); // Assuming useAuth provides user data including profile
+  const [inventory, setInventory] = useState<InventoryItemData[]>([]); // Use InventoryItemData type
+  const [isLoadingInventory, setIsLoadingInventory] = useState(true); // Added loading state for inventory
+  const [isSubmittingIngredient, setIsSubmittingIngredient] = useState(false); // Added for add ingredient loading
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -129,8 +90,9 @@ const Index = () => {
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [isQuickCooking, setIsQuickCooking] = useState(false);
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
+  const navigate = useNavigate();
   
   // New ingredient form state
   const [newIngredient, setNewIngredient] = useState({
@@ -140,6 +102,28 @@ const Index = () => {
     category: "Vegetables",
     expiryDate: undefined as Date | undefined
   });
+
+  // Fetch inventory from backend
+  useEffect(() => {
+    const fetchInventory = async () => {
+      setIsLoadingInventory(true);
+      try {
+        const data = await apiGet<{items: InventoryItemData[]}>("/inventory");
+        setInventory(data.items || []);
+      } catch (error: any) {
+        console.error("Failed to fetch inventory for landing page:", error);
+        toast({
+          title: "Error fetching ingredients",
+          description: error.data?.message || "Could not load your ingredients for the landing page.",
+          variant: "destructive",
+        });
+        setInventory([]); // Set to empty array on error
+      } finally {
+        setIsLoadingInventory(false);
+      }
+    };
+    fetchInventory();
+  }, [toast]);
   
   // Filter inventory based on search and category
   const filteredInventory = inventory.filter(item => {
@@ -166,48 +150,75 @@ const Index = () => {
     setIngredientTags(ingredientTags.filter(tag => tag !== ingredient));
   };
 
-  const handleRemoveIngredient = (id: string) => {
+  const handleRemoveIngredient = async (id: string) => {
+    // Optimistically update UI
+    const originalInventory = [...inventory];
     setInventory(inventory.filter(item => item.id !== id));
-    toast({
-      title: "Ingredient removed",
-      description: "Item has been removed from your inventory",
-    });
+
+    try {
+      await apiDelete(`/inventory/${id}`);
+      toast({
+        title: "Ingredient removed",
+        description: "Item has been removed from your inventory.",
+      });
+      // No need to setInventory again if API call is successful, UI is already updated
+    } catch (error: any) {
+      // Revert UI change if API call fails
+      setInventory(originalInventory);
+      console.error("Failed to remove ingredient:", error);
+      toast({
+        title: "Error removing ingredient",
+        description: error.data?.message || "Could not remove item. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
-  const handleAddIngredient = () => {
+  const handleAddIngredient = async () => {
     if (!newIngredient.name || !newIngredient.quantity) {
       toast({
         title: "Missing information",
-        description: "Please fill in all required fields",
+        description: "Please fill in name and quantity.",
         variant: "destructive"
       });
       return;
     }
-    
-    const newId = (inventory.length + 1).toString();
-    const newItem = {
-      id: newId,
+
+    setIsSubmittingIngredient(true);
+
+    const payload = {
       name: newIngredient.name,
-      quantity: newIngredient.quantity,
+      quantity: parseFloat(newIngredient.quantity) || 0,
       unit: newIngredient.unit,
       category: newIngredient.category,
-      expiryDate: newIngredient.expiryDate ? format(newIngredient.expiryDate, "yyyy-MM-dd") : undefined
+      expiryDate: newIngredient.expiryDate ? format(newIngredient.expiryDate, "yyyy-MM-dd") : null
     };
     
-    setInventory([...inventory, newItem]);
-    setIsAddDialogOpen(false);
-    setNewIngredient({
-      name: "",
-      quantity: "",
-      unit: "pcs",
-      category: "Vegetables",
-      expiryDate: undefined
-    });
-    
-    toast({
-      title: "Ingredient added",
-      description: `${newItem.name} has been added to your inventory`
-    });
+    try {
+      const addedItem = await apiPost<InventoryItemData>("/inventory", payload);
+      setInventory(prevInventory => [...prevInventory, addedItem]);
+      setIsAddDialogOpen(false);
+      setNewIngredient({
+        name: "",
+        quantity: "",
+        unit: "pcs",
+        category: "Vegetables",
+        expiryDate: undefined
+      });
+      toast({
+        title: "Ingredient added",
+        description: `${addedItem.name} has been added to your inventory.`
+      });
+    } catch (error: any) {
+      console.error("Failed to add ingredient:", error);
+      toast({
+        title: "Error adding ingredient",
+        description: error.data?.message || "Could not add item. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingIngredient(false);
+    }
   };
   
   const handleToggleIngredient = (id: string) => {
@@ -229,28 +240,53 @@ const Index = () => {
     });
   };
   
-  const handleGenerateRecipes = () => {
-    const ingredientsList = ingredientTags.length > 0 ? `${ingredientTags.length} ingredients` : "no specific ingredients";
-    const equipmentInfo = selectedEquipment.length > 0 
-      ? `using ${selectedEquipment.join(', ')}`
-      : "with any kitchen equipment";
-    const timeInfo = isQuickCooking ? "quick cooking time" : "any cooking time";
-    const mealInfo = mealType ? `for ${mealType}` : "for any meal type";
+  const handleGenerateRecipes = async () => { 
+    // apiParams is what we intend to send to the backend.
+    // Optional fields to be omitted are set to 'undefined'.
+    const apiParams: Record<string, string | number | boolean | undefined> = {
+      ingredients: ingredientTags.length > 0 ? ingredientTags.join(',') : "",
+      mealType: mealType || "", 
+      maxPrepTime: isQuickCooking ? "quick" : "any time",
+      kitchenEquipment: selectedEquipment.length > 0 ? selectedEquipment.join(',') : "",
+      page: 1,
+      limit: 10,
+    };
+
+    const definedParams = Object.fromEntries(
+      Object.entries(apiParams).filter(([, value]) => value !== undefined)
+    );
+
+    const queryString = new URLSearchParams(
+      definedParams as Record<string, string> 
+    ).toString();
     
-    const message = `Generated recipes with ${ingredientsList}, ${equipmentInfo}, ${timeInfo}, ${mealInfo}`;
-    
-    toast({
-      title: "Recipes generated",
-      description: message,
-    });
-    
-    // Reset form
-    setIngredientInput("");
-    setIngredientTags([]);
-    setSelectedIngredients([]);
-    setIsQuickCooking(false);
-    setSelectedEquipment([]);
-    setMealType("");
+    try {
+      // Call GET /api/recipes endpoint
+      const response = await apiGet<any>(`/recipes?${queryString}`); 
+      
+      toast({
+        title: "Recipe Search Complete",
+        description: "Successfully fetched recipes based on your criteria.",
+      });
+      
+      navigate("/recipes/results", { state: { queryParams: apiParams, results: response } });
+      
+      // Reset form
+      setIngredientInput("");
+      setIngredientTags([]);
+      setSelectedIngredients([]);
+      setIsQuickCooking(false);
+      setSelectedEquipment(kitchenEquipment.map(tool => tool.id)); // Reset equipment selector
+      setMealType("");
+
+    } catch (error: any) {
+      console.error("Failed to fetch recipes:", error);
+      toast({
+        title: "Error Fetching Recipes",
+        description: error.data?.message || "Could not fetch recipes. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleScanReceipt = () => {
@@ -273,51 +309,62 @@ const Index = () => {
             </p>
             
             {/* Recipe Generation Form */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-6">
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-left block">Enter your ingredients</label>
-                <Input 
-                  placeholder="Type ingredient and press Enter or comma..."
-                  value={ingredientInput}
-                  onChange={(e) => setIngredientInput(e.target.value)}
-                  onKeyDown={handleIngredientInputKeyDown}
-                  className="bg-white/90 text-kitchen-dark"
-                />
-                {ingredientTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {ingredientTags.map((ingredient, index) => (
-                      <IngredientTag
-                        key={index}
-                        ingredient={ingredient}
-                        onRemove={() => removeIngredientTag(ingredient)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Cooking Time</label>
-                  <Button
-                    variant={isQuickCooking ? "secondary" : "outline"}
-                    onClick={() => setIsQuickCooking(!isQuickCooking)}
-                    className="w-full bg-white/90 text-kitchen-dark hover:bg-white/80"
-                  >
-                    {isQuickCooking ? "Quick (< 30 mins)" : "Any cooking time"}
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Meal Type</label>
-                  <MealTypeSelector
-                    selectedMealType={mealType}
-                    onMealTypeChange={setMealType}
+            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-8 text-left">
+
+              {/* Section 1: Ingredients */}
+              <div className="bg-black/5 p-4 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold text-white">1. What do you have?</h3>
+                <div className="bg-black/5 p-4 rounded-lg">
+                  <Input 
+                    placeholder="Type ingredient and press Enter or comma..."
+                    value={ingredientInput}
+                    onChange={(e) => setIngredientInput(e.target.value)}
+                    onKeyDown={handleIngredientInputKeyDown}
+                    className="bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange"
                   />
+                  {ingredientTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {ingredientTags.map((ingredient, index) => (
+                        <IngredientTag
+                          key={index}
+                          ingredient={ingredient}
+                          onRemove={() => removeIngredientTag(ingredient)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-left block">Kitchen Equipment</label>
+              </div>
+
+              {/* Section 2: Preferences */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-white">2. Your Preferences</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/5 p-4 rounded-lg">
+                  <div className="space-y-2 flex flex-col items-center">
+                    <label className="text-sm font-medium text-white block">Cooking Time</label>
+                    <Button
+                      variant={isQuickCooking ? "secondary" : "outline"}
+                      onClick={() => setIsQuickCooking(!isQuickCooking)}
+                      className="bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange flex items-center justify-center gap-2 px-4 w-32"
+                    >
+                      <Clock className="h-4 w-4" />
+                      {isQuickCooking ? "Quick" : "Any Time"}
+                    </Button>
+                  </div>
+                  <div className="space-y-2 flex flex-col items-center">
+                    <label className="text-sm font-medium text-white block">Meal Type</label>
+                    <MealTypeSelector
+                      selectedMealType={mealType}
+                      onMealTypeChange={setMealType}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Kitchen Equipment */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-white">3. Kitchen Equipment</h3>
+                <div className="bg-black/5 p-4 rounded-lg flex justify-center">
                   <KitchenEquipmentSelector
                     selectedEquipment={selectedEquipment}
                     onEquipmentChange={setSelectedEquipment}
@@ -325,12 +372,15 @@ const Index = () => {
                 </div>
               </div>
               
-              <Button 
-                onClick={handleGenerateRecipes}
-                className="w-full bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-semibold py-3 text-lg"
-              >
-                Suggest me a recipe!
-              </Button>
+              {/* Generate Button */}
+              <div className="flex justify-center">
+                <Button 
+                  onClick={handleGenerateRecipes}
+                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
+                >
+                  Find My Perfect Recipe!
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -448,11 +498,11 @@ const Index = () => {
                 </div>
                 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmittingIngredient}>
                     Cancel
                   </Button>
-                  <Button onClick={handleAddIngredient}>
-                    Add to Inventory
+                  <Button onClick={handleAddIngredient} disabled={isSubmittingIngredient}>
+                    {isSubmittingIngredient ? "Adding..." : "Add to Inventory"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -500,46 +550,66 @@ const Index = () => {
             </div>
             
             <TabsContent value="all" className="mt-0">
-              {filteredInventory.length > 0 ? (
+              {isLoadingInventory ? (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground mb-4">Loading your ingredients...</p>
+                </div>
+              ) : filteredInventory.length > 0 ? (
                 <div className="max-h-96 overflow-y-auto space-y-2">
                   {filteredInventory.map((ingredient) => (
                     <IngredientItem
                       key={ingredient.id}
-                      ingredient={ingredient}
+                      ingredient={{
+                        ...ingredient,
+                        quantity: String(ingredient.quantity),
+                        category: ingredient.category || "Pantry", // Ensure category is always provided
+                      }}
                       inInventory={true}
-                      onRemove={handleRemoveIngredient}
-                      onSelect={handleToggleIngredient}
+                      onRemove={() => handleRemoveIngredient(ingredient.id)}
+                      onSelect={() => handleToggleIngredient(ingredient.id)}
                       selected={selectedIngredients.includes(ingredient.id)}
                     />
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-10">
-                  <p className="text-muted-foreground mb-4">No ingredients found</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedCategory("All");
-                      setExpiringOnly(false);
-                    }}
-                  >
-                    Clear filters
-                  </Button>
+                  <p className="text-muted-foreground mb-4">
+                    {expiringOnly ? "No expiring ingredients found." : (searchQuery || selectedCategory !== "All" ? "No ingredients match your filters." : "Your inventory is empty. Add some ingredients!")}
+                  </p>
+                  {(searchQuery || selectedCategory !== "All" || expiringOnly) && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setExpiringOnly(false); }}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
                 </div>
               )}
             </TabsContent>
             
             <TabsContent value="expiring" className="mt-0">
-              {filteredInventory.length > 0 ? (
+              {isLoadingInventory ? (
+                 <div className="text-center py-10">
+                   <p className="text-muted-foreground mb-4">Loading your ingredients...</p>
+                 </div>
+              ) : filteredInventory.filter(item => { // Ensure we only show expiring items here
+                return item.expiryDate && new Date(item.expiryDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+              }).length > 0 ? (
                 <div className="max-h-96 overflow-y-auto space-y-2">
-                  {filteredInventory.map((ingredient) => (
+                  {filteredInventory.filter(item => {
+                     return item.expiryDate && new Date(item.expiryDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                  }).map((ingredient) => (
                     <IngredientItem
                       key={ingredient.id}
-                      ingredient={ingredient}
+                      ingredient={{
+                        ...ingredient,
+                        quantity: String(ingredient.quantity),
+                        category: ingredient.category || "Pantry", // Ensure category is always provided
+                      }}
                       inInventory={true}
-                      onRemove={handleRemoveIngredient}
-                      onSelect={handleToggleIngredient}
+                      onRemove={() => handleRemoveIngredient(ingredient.id)}
+                      onSelect={() => handleToggleIngredient(ingredient.id)}
                       selected={selectedIngredients.includes(ingredient.id)}
                     />
                   ))}

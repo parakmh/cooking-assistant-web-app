@@ -42,9 +42,9 @@ const RecipeResults = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Ensure results and suggestedForYou are properly destructured and have defaults
-  const { queryParams, results } = location.state || { queryParams: {}, results: { recipes: [], suggestedForYou: [] } };
+  const { queryParams, results } = location.state || { queryParams: {}, results: { results: [], suggestedForYou: [] } };
   const suggestions: RecipeSuggestion[] = results.suggestedForYou || [];
-  const recipesFromSearch = results.recipes || []; // Assuming 'recipes' is the key for main search results
+  const recipesFromSearch: RecipeSuggestion[] = results.results || []; // Changed from results.recipes to results.results and added type
 
   // Log queryParams to the console
   useEffect(() => {

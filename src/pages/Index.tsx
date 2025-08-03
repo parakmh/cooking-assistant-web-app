@@ -39,8 +39,7 @@ import IngredientItem from "@/components/IngredientItem"; // IngredientItem comp
 import IngredientTag from "@/components/IngredientTag"; // IngredientTag component
 import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector"; // KitchenEquipmentSelector component
 import MealTypeSelector from "@/components/MealTypeSelector"; // MealTypeSelector component
-import { CalendarIcon, Clock, Plus, Search, Upload } from "lucide-react"; // Icons
-import { useAuth } from "@/hooks/useAuth"; // Assuming useAuth hook provides user profile
+import { CalendarIcon, Clock, Plus, Search, Upload, Loader2, ChefHat, Sparkles } from "lucide-react"; // Icons
 
 
 // Categories for filtering
@@ -76,10 +75,10 @@ const kitchenEquipment = [
 
 const Index = () => {
   const { toast } = useToast();
-  const { user } = useAuth(); // Assuming useAuth provides user data including profile
   const [inventory, setInventory] = useState<InventoryItemData[]>([]); // Use InventoryItemData type
   const [isLoadingInventory, setIsLoadingInventory] = useState(true); // Added loading state for inventory
   const [isSubmittingIngredient, setIsSubmittingIngredient] = useState(false); // Added for add ingredient loading
+  const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false); // Added for recipe generation loading
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -241,6 +240,8 @@ const Index = () => {
   };
   
   const handleGenerateRecipes = async () => { 
+    setIsGeneratingRecipes(true);
+    
     // apiParams is what we intend to send to the backend.
     // Optional fields to be omitted are set to 'undefined'.
     const apiParams: Record<string, string | number | boolean | undefined> = {
@@ -286,6 +287,8 @@ const Index = () => {
         description: error.data?.message || "Could not fetch recipes. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingRecipes(false);
     }
   };
   
@@ -376,9 +379,20 @@ const Index = () => {
               <div className="flex justify-center">
                 <Button 
                   onClick={handleGenerateRecipes}
-                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
+                  disabled={isGeneratingRecipes}
+                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  Find My Perfect Recipe!
+                  {isGeneratingRecipes ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Finding Recipes...
+                    </>
+                  ) : (
+                    <>
+                      <ChefHat className="mr-2 h-5 w-5" />
+                      Find My Perfect Recipe!
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -696,6 +710,73 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Loading Dialog */}
+      <Dialog open={isGeneratingRecipes} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md border-0 bg-gradient-to-br from-kitchen-green/10 to-kitchen-orange/10 backdrop-blur-sm">
+          <DialogHeader className="text-center pb-0">
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-kitchen-green to-kitchen-orange bg-clip-text text-transparent">
+              Creating Your Perfect Recipe
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
+              Our AI is analyzing your ingredients and preferences...
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center justify-center py-8">
+            {/* Animated cooking elements */}
+            <div className="relative mb-6">
+              {/* Main spinner */}
+              <div className="relative">
+                <Loader2 className="h-16 w-16 animate-spin text-kitchen-orange" />
+                {/* Inner sparkle effect */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-kitchen-green animate-pulse" />
+                </div>
+              </div>
+              
+              {/* Floating ingredients animation */}
+              <div className="absolute -top-4 -left-4 w-4 h-4 bg-kitchen-green rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+              <div className="absolute -top-2 -right-6 w-3 h-3 bg-kitchen-orange rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute -bottom-4 -right-2 w-5 h-5 bg-kitchen-teal rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute -bottom-2 -left-6 w-2 h-2 bg-kitchen-green rounded-full animate-bounce" style={{ animationDelay: '1.5s' }}></div>
+            </div>
+
+            {/* Loading progress indicator */}
+            <div className="w-full max-w-xs mx-auto mb-4">
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-kitchen-green to-kitchen-orange rounded-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Loading messages */}
+            <div className="text-center space-y-2">
+              <p className="text-lg font-semibold text-kitchen-dark">
+                Analyzing ingredients...
+              </p>
+              <p className="text-sm text-muted-foreground animate-pulse">
+                This usually takes just a few seconds
+              </p>
+            </div>
+
+            {/* Recipe generation steps */}
+            <div className="mt-6 space-y-2 text-sm text-muted-foreground text-center">
+              <div className="flex items-center justify-center space-x-2 opacity-100">
+                <div className="w-2 h-2 bg-kitchen-green rounded-full animate-ping"></div>
+                <span>Matching with recipe database</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2 opacity-75">
+                <div className="w-2 h-2 bg-kitchen-orange rounded-full"></div>
+                <span>Calculating nutrition values</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2 opacity-50">
+                <div className="w-2 h-2 bg-kitchen-teal rounded-full"></div>
+                <span>Personalizing recommendations</span>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

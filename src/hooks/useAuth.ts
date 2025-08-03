@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getToken, removeToken, setToken as storeToken } from '../lib/api';
+import { getToken, getValidToken, removeToken, setToken as storeToken } from '../lib/api';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -15,10 +15,9 @@ export const useAuth = () => {
   });
 
   useEffect(() => {
-    const token = getToken();
+    // Use getValidToken which checks expiration and automatically cleans up expired tokens
+    const token = getValidToken();
     if (token) {
-      // Here you might want to validate the token with the backend
-      // For now, we'll assume if a token exists, it's valid
       setAuthState({ isAuthenticated: true, isLoading: false });
     } else {
       setAuthState({ isAuthenticated: false, isLoading: false });

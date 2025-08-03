@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apiGet, apiPost, apiDelete, InventoryItemData } from "@/lib/api"; // Added apiPost, apiDelete
+import { apiGet, apiPost, apiDelete, InventoryItemData } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast"; // Ensure useToast is imported
 import { format } from "date-fns"; // For formatting date
 import { cn } from "@/lib/utils"; // For conditional classes
@@ -40,6 +40,7 @@ import IngredientTag from "@/components/IngredientTag"; // IngredientTag compone
 import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector"; // KitchenEquipmentSelector component
 import MealTypeSelector from "@/components/MealTypeSelector"; // MealTypeSelector component
 import { CalendarIcon, Clock, Plus, Search, Upload, Loader2, ChefHat, Sparkles } from "lucide-react"; // Icons
+import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
 
 
 // Categories for filtering
@@ -75,6 +76,7 @@ const kitchenEquipment = [
 
 const Index = () => {
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   const [inventory, setInventory] = useState<InventoryItemData[]>([]); // Use InventoryItemData type
   const [isLoadingInventory, setIsLoadingInventory] = useState(true); // Added loading state for inventory
   const [isSubmittingIngredient, setIsSubmittingIngredient] = useState(false); // Added for add ingredient loading
@@ -102,8 +104,14 @@ const Index = () => {
     expiryDate: undefined as Date | undefined
   });
 
-  // Fetch inventory from backend
+  // Fetch inventory from backend - only when authenticated
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoadingInventory(false);
+      setInventory([]);
+      return;
+    }
+
     const fetchInventory = async () => {
       setIsLoadingInventory(true);
       try {
@@ -122,7 +130,7 @@ const Index = () => {
       }
     };
     fetchInventory();
-  }, [toast]);
+  }, [toast, isAuthenticated]);
   
   // Filter inventory based on search and category
   const filteredInventory = inventory.filter(item => {
@@ -400,8 +408,9 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Inventory Section */}
-      <section className="py-12 kitchen-container">
+      {/* Inventory Section - Only show if authenticated */}
+      {isAuthenticated && (
+        <section className="py-12 kitchen-container">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h2 className="text-3xl font-bold">Your Ingredients</h2>
@@ -661,6 +670,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
       
       {/* AI Features Section */}
       <section className="py-12 bg-kitchen-light">

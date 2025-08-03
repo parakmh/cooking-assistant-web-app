@@ -23,6 +23,23 @@ export const useAuth = () => {
     } else {
       setAuthState({ isAuthenticated: false, isLoading: false });
     }
+
+    // Listen for global logout events (e.g., from expired tokens in API calls)
+    const handleGlobalLogout = (event: CustomEvent) => {
+      console.log('Global logout triggered:', event.detail?.reason || 'unknown');
+      setAuthState({ isAuthenticated: false, isLoading: false });
+      
+      // Redirect to landing page immediately
+      if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+        window.location.href = '/';
+      }
+    };
+
+    window.addEventListener('auth:logout', handleGlobalLogout as EventListener);
+    
+    return () => {
+      window.removeEventListener('auth:logout', handleGlobalLogout as EventListener);
+    };
   }, []);
 
   const login = useCallback(() => {

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Coffee, Sun, Moon, Cookie, Zap, Leaf, Wheat, Milk, TreePine, Carrot, Heart } from "lucide-react";
+import { Coffee, Sun, Moon, Cookie, Zap, Leaf, Wheat, Milk, TreePine, Carrot, Heart, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface MealTypeSelectorProps {
   selectedMealType: string;
@@ -31,6 +32,7 @@ const MealTypeSelector = ({
   selectedDietaryPreferences = [],
   onDietaryPreferencesChange 
 }: MealTypeSelectorProps) => {
+  const [isDietaryExpanded, setIsDietaryExpanded] = useState(false);
   const mealTypesOnly = mealTypes.filter(type => type.category === "meal");
   const dietaryOptions = mealTypes.filter(type => type.category === "dietary");
 
@@ -86,28 +88,49 @@ const MealTypeSelector = ({
         </div>
       </div>
 
-      {/* Dietary Preferences */}
+      {/* Dietary Preferences Dropdown */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-white block text-center">
-          Dietary Preferences
-        </h4>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-2xl mx-auto">
-          {dietaryOptions.map((dietary) => {
-            const isSelected = selectedDietaryPreferences.includes(dietary.id);
-            return (
-              <Button
-                key={dietary.id}
-                variant="ghost"
-                onClick={() => handleDietaryToggle(dietary.id)}
-                className={getButtonClassName(isSelected, dietary.color)}
-              >
-                <dietary.icon className={getIconClassName(isSelected)} />
-                <span className={getTextClassName(isSelected)}>
-                  {dietary.label}
-                </span>
-              </Button>
-            );
-          })}
+        <button
+          onClick={() => setIsDietaryExpanded(!isDietaryExpanded)}
+          className="flex items-center justify-between w-full max-w-xs mx-auto p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200 border border-white/20 group backdrop-blur-sm"
+        >
+          <span className="font-medium text-white text-sm">
+            Dietary Preferences
+            {selectedDietaryPreferences.length > 0 && (
+              <span className="ml-2 text-xs text-green-300 font-normal">
+                ({selectedDietaryPreferences.length} selected)
+              </span>
+            )}
+          </span>
+          <ChevronDown 
+            className={`w-4 h-4 text-white/70 transition-transform duration-200 group-hover:text-white ${
+              isDietaryExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+        
+        {/* Animated Dropdown Content */}
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isDietaryExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-2xl mx-auto pt-2">
+            {dietaryOptions.map((dietary) => {
+              const isSelected = selectedDietaryPreferences.includes(dietary.id);
+              return (
+                <Button
+                  key={dietary.id}
+                  variant="ghost"
+                  onClick={() => handleDietaryToggle(dietary.id)}
+                  className={getButtonClassName(isSelected, dietary.color)}
+                >
+                  <dietary.icon className={getIconClassName(isSelected)} />
+                  <span className={getTextClassName(isSelected)}>
+                    {dietary.label}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

@@ -91,7 +91,7 @@ const Index = () => {
   const [ingredientInput, setIngredientInput] = useState("");
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [cookingTime, setCookingTime] = useState("");
+  const [cookingTime, setCookingTime] = useState("any");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
   const [selectedDietaryPreferences, setSelectedDietaryPreferences] = useState<string[]>([]);
@@ -314,7 +314,7 @@ const Index = () => {
       setIngredientInput("");
       setIngredientTags([]);
       setSelectedIngredients([]);
-      setCookingTime("");
+      setCookingTime("any");
       setSelectedEquipment(kitchenEquipment.map(tool => tool.id)); // Reset equipment selector
       setMealType("");
       // Don't reset dietary preferences as they should persist from user profile

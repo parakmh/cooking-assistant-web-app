@@ -7,8 +7,8 @@ interface CookingTimeSelectorProps {
 }
 
 const cookingTimes = [
-  { id: "quick", label: "Quick (< 15 min)", icon: Zap, color: "from-red-400 to-orange-500" },
-  { id: "any", label: "Any Time", icon: Timer, color: "from-blue-400 to-cyan-500" },
+  { id: "quick", label: "Quick (< 15 min)", icon: Zap, color: "from-orange-400 to-orange-500" },
+  { id: "any", label: "Any Time", icon: Timer, color: "from-orange-400 to-orange-500" },
 ];
 
 const CookingTimeSelector = ({ selectedCookingTime, onCookingTimeChange }: CookingTimeSelectorProps) => {
@@ -37,7 +37,7 @@ const CookingTimeSelector = ({ selectedCookingTime, onCookingTimeChange }: Cooki
           <Button
             key={timeOption.id}
             variant="ghost"
-            onClick={() => onCookingTimeChange(selectedCookingTime === timeOption.id ? "" : timeOption.id)}
+            onClick={() => onCookingTimeChange(timeOption.id)}
             className={getButtonClassName(isSelected, timeOption.color)}
           >
             <timeOption.icon className={getIconClassName(isSelected)} />

@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet, RecipeSuggestion } from '@/lib/api';
+import { getRecipeImageUrl } from '@/lib/recipeImages';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users } from 'lucide-react';
@@ -22,7 +23,14 @@ const RecipeDetailsPage = () => {
       </Button>
       <h1 className="text-3xl font-bold mt-4 mb-6">{recipe.name}</h1>
       <img
-        src={recipe.imageUrl || '/placeholder.svg'}
+        src={getRecipeImageUrl({
+          name: recipe.name,
+          ingredients: recipe.ingredients,
+          tags: recipe.tags,
+          mealType: recipe.mealType,
+          cuisine: recipe.cuisine,
+          imageUrl: recipe.imageUrl
+        })}
         alt={recipe.name}
         className="w-full h-64 object-cover rounded-lg mb-6"
       />

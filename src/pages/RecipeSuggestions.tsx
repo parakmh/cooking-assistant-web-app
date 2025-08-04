@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import RecipeCard from "@/components/RecipeCard";
 import { apiGet } from "@/lib/api";
+import { getRecipeImageUrl } from "@/lib/recipeImages";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -105,14 +106,15 @@ export default function RecipeSuggestionsPage() {
   const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion) => ({
     id: suggestion.id,
     title: suggestion.name, // Map 'name' to 'title'
-    image: suggestion.imageUrl || "/placeholder.svg", // Provide a fallback image
+    name: suggestion.name,
     cookTime: `${suggestion.prepTimeMinutes + suggestion.cookTimeMinutes} mins`, // Calculate total time
     servings: suggestion.servings,
     difficulty: suggestion.difficulty,
     tags: suggestion.tags || [],
-    // ingredients: suggestion.ingredients.map(ing => `${ing.quantity} ${ing.unit} ${ing.name}`), // Example transformation
-    // kitchenEquipmentNeeded: suggestion.kitchenEquipmentNeeded, // Pass through if RecipeCard can use it
-    // matchPercentage: calculateMatch(suggestion) // Example of adding a dynamic prop
+    ingredients: suggestion.ingredients,
+    mealType: suggestion.mealType,
+    cuisine: suggestion.cuisine,
+    // Don't pass imageUrl - let the new system determine the appropriate image based on recipe data
   });
 
 

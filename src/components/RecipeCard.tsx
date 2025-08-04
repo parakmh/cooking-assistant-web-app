@@ -2,16 +2,20 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Clock, User } from "lucide-react";
 import { getBackendDomain } from "@/lib/api";
+import { getRecipeImageUrl } from "@/lib/recipeImages";
 
 interface Recipe {
   id: string;
   title: string;
-  imageUrl: string;
+  imageUrl?: string; // Made optional since we'll generate it
   cookTime: string;
   servings: number;
   difficulty: "easy" | "medium" | "hard";
   tags: string[];
-  ingredients?: string[];
+  ingredients?: string[] | Array<{ name: string; quantity: string; unit: string }>;
+  mealType?: string[];
+  cuisine?: string;
+  name?: string; // Some recipes use 'name' instead of 'title'
 }
 
 interface RecipeCardProps {
@@ -37,24 +41,28 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
     hard: "bg-red-100 text-red-800"
   };
 
-  // Determine the image source safely
-  let imageSrc = '/placeholder.svg';
-  if (recipe.imageUrl && typeof recipe.imageUrl === 'string') {
-    if (recipe.imageUrl.startsWith('/')) {
-      imageSrc = `${getBackendDomain()}${recipe.imageUrl}`;
-    } else {
-      imageSrc = recipe.imageUrl;
-    }
-  }
-  // Log the final image source being used
-  console.log(`Recipe: "${recipe.title}", Original imageUrl: "${recipe.imageUrl}", Processed imageSrc: "${imageSrc}"`);
+  // Determine the image source using the new mapping system
+  const imageSrc = getRecipeImageUrl({
+    name: recipe.name,
+    title: recipe.title,
+    ingredients: recipe.ingredients,
+    tags: recipe.tags,
+    mealType: recipe.mealType,
+    cuisine: recipe.cuisine,
+    imageUrl: recipe.imageUrl
+  });
+  
+  // Fallback to placeholder.svg if the mapped image doesn't exist or for backwards compatibility
+  const finalImageSrc = imageSrc.startsWith('/images/placeholders/') 
+    ? imageSrc 
+    : (recipe.imageUrl?.startsWith('/') ? `${getBackendDomain()}${recipe.imageUrl}` : (recipe.imageUrl || '/placeholder.svg'));
   
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
       <div className="relative h-48 overflow-hidden">
         <img
-          src={imageSrc}
-          alt={recipe.title || 'Recipe image'}
+          src={finalImageSrc}
+          alt={recipe.title || recipe.name || 'Recipe image'}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-2 right-2 flex flex-col gap-2">

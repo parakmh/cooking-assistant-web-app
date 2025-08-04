@@ -21,54 +21,55 @@ import {
 import RecipeCard from "@/components/RecipeCard";
 import MealTypeSelector from "@/components/MealTypeSelector";
 import { useToast } from "@/hooks/use-toast";
+import { getRecipeImageUrl } from "@/lib/recipeImages";
 
 // Mock generated recipes data (recipes that were generated for the user)
 const mockGeneratedRecipes = [
   {
     id: "1",
     title: "AI-Generated Chicken & Rice Stir-fry",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&h=600&q=80",
     cookTime: "25 mins",
     servings: 3,
     difficulty: "easy" as const,
     tags: ["Generated", "Quick", "Healthy"],
     ingredients: ["Chicken breast", "Rice", "Bell peppers", "Garlic", "Soy sauce"],
+    mealType: ["Dinner"],
     generatedAt: "2025-05-25",
     isFavorite: false
   },
   {
     id: "2",
     title: "AI-Generated Creamy Spinach Pasta",
-    image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=800&h=600&q=80",
     cookTime: "20 mins",
     servings: 2,
     difficulty: "easy" as const,
     tags: ["Generated", "Vegetarian", "Quick"],
     ingredients: ["Pasta", "Spinach", "Cream", "Garlic", "Parmesan"],
+    mealType: ["Dinner"],
     generatedAt: "2025-05-24",
     isFavorite: true
   },
   {
     id: "3",
     title: "AI-Generated Greek Yogurt Breakfast Bowl",
-    image: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?auto=format&fit=crop&w=800&h=600&q=80",
     cookTime: "10 mins",
     servings: 1,
     difficulty: "easy" as const,
     tags: ["Generated", "Breakfast", "Healthy"],
     ingredients: ["Greek yogurt", "Berries", "Granola", "Honey"],
+    mealType: ["Breakfast"],
     generatedAt: "2025-05-23",
     isFavorite: false
   },
   {
     id: "4",
     title: "AI-Generated Tomato Egg Scramble",
-    image: "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?auto=format&fit=crop&w=800&h=600&q=80",
     cookTime: "15 mins",
     servings: 2,
     difficulty: "easy" as const,
     tags: ["Generated", "Breakfast", "Quick"],
     ingredients: ["Eggs", "Tomatoes", "Onion", "Olive oil"],
+    mealType: ["Breakfast"],
     generatedAt: "2025-05-22",
     isFavorite: true
   }
@@ -364,7 +365,12 @@ const RecipesHistory = () => {
               
               <div className="space-y-6">
                 <img 
-                  src={selectedRecipe.image} 
+                  src={getRecipeImageUrl({
+                    title: selectedRecipe.title,
+                    ingredients: selectedRecipe.ingredients,
+                    tags: selectedRecipe.tags,
+                    mealType: selectedRecipe.mealType
+                  })} 
                   alt={selectedRecipe.title}
                   className="w-full h-64 object-cover rounded-lg"
                 />

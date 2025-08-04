@@ -5,11 +5,8 @@
 
 export type RecipeImageCategory = 
   | 'chicken'
-  | 'beef' 
-  | 'pork'
+  | 'meat' // Combined beef/pork category
   | 'fish'
-  | 'seafood'
-  | 'vegetarian'
   | 'vegan'
   | 'pasta'
   | 'rice'
@@ -19,20 +16,14 @@ export type RecipeImageCategory =
   | 'breakfast'
   | 'sandwich'
   | 'pizza'
-  | 'stir-fry'
-  | 'curry'
-  | 'bread'
   | 'smoothie'
   | 'default';
 
 // Mapping of categories to placeholder image filenames
 const IMAGE_MAPPING: Record<RecipeImageCategory, string> = {
   'chicken': '/images/placeholders/chicken.png',
-  'beef': '/images/placeholders/beef.png',
-  'pork': '/images/placeholders/pork.png',
+  'meat': '/images/placeholders/meat.png', // Use meat.png for all meat (beef/pork)
   'fish': '/images/placeholders/fish.png',
-  'seafood': '/images/placeholders/seafood.png',
-  'vegetarian': '/images/placeholders/vegetarian.png',
   'vegan': '/images/placeholders/vegan.png',
   'pasta': '/images/placeholders/pasta.png',
   'rice': '/images/placeholders/rice.png',
@@ -42,9 +33,6 @@ const IMAGE_MAPPING: Record<RecipeImageCategory, string> = {
   'breakfast': '/images/placeholders/breakfast.png',
   'sandwich': '/images/placeholders/sandwich.png',
   'pizza': '/images/placeholders/pizza.png',
-  'stir-fry': '/images/placeholders/stir-fry.png',
-  'curry': '/images/placeholders/curry.png',
-  'bread': '/images/placeholders/bread.png',
   'smoothie': '/images/placeholders/smoothie.png',
   'default': '/images/placeholders/default.png'
 };
@@ -90,14 +78,24 @@ export function determineRecipeImageCategory(recipeData: {
       ingredientNames.some(ing => ing.includes('pasta') || ing.includes('spaghetti'))) {
     return 'pasta';
   }
+  // Stir-fry and curry now fall back to default or rice if rice is present
   if (recipeName.includes('stir-fry') || recipeName.includes('stir fry')) {
-    return 'stir-fry';
+    // Check if rice is present, otherwise use default
+    if (recipeName.includes('rice') || ingredientNames.some(ing => ing.includes('rice'))) {
+      return 'rice';
+    }
+    return 'default';
   }
   if (recipeName.includes('curry') || cuisine.includes('indian') || cuisine.includes('thai')) {
-    return 'curry';
+    // Check if rice is present, otherwise use default
+    if (recipeName.includes('rice') || ingredientNames.some(ing => ing.includes('rice'))) {
+      return 'rice';
+    }
+    return 'default';
   }
+  // Bread now falls back to sandwich or default
   if (recipeName.includes('bread') || recipeName.includes('toast') || recipeName.includes('baguette')) {
-    return 'bread';
+    return 'sandwich'; // Most bread dishes are sandwich-like
   }
   if (recipeName.includes('smoothie') || recipeName.includes('shake')) {
     return 'smoothie';
@@ -120,27 +118,30 @@ export function determineRecipeImageCategory(recipeData: {
   if (tags.includes('vegan')) {
     return 'vegan';
   }
+  // Vegetarian dishes now fall back to vegan if no specific dish type
   if (tags.includes('vegetarian')) {
-    return 'vegetarian';
+    return 'vegan'; // Use vegan image for vegetarian dishes too
   }
 
   // Priority 4: Check for main protein ingredients
   if (recipeName.includes('chicken') || ingredientNames.some(ing => ing.includes('chicken'))) {
     return 'chicken';
   }
+  // Both beef and pork now use the 'meat' category
   if (recipeName.includes('beef') || ingredientNames.some(ing => ing.includes('beef'))) {
-    return 'beef';
+    return 'meat';
   }
   if (recipeName.includes('pork') || ingredientNames.some(ing => ing.includes('pork'))) {
-    return 'pork';
+    return 'meat';
   }
   if (recipeName.includes('fish') || recipeName.includes('salmon') || recipeName.includes('tuna') || 
       ingredientNames.some(ing => ing.includes('fish') || ing.includes('salmon') || ing.includes('tuna'))) {
     return 'fish';
   }
+  // Seafood dishes now fall back to fish
   if (recipeName.includes('shrimp') || recipeName.includes('crab') || recipeName.includes('lobster') ||
       ingredientNames.some(ing => ing.includes('shrimp') || ing.includes('crab') || ing.includes('lobster'))) {
-    return 'seafood';
+    return 'fish'; // Use fish image for all seafood
   }
 
   // Priority 5: Check for common breakfast ingredients

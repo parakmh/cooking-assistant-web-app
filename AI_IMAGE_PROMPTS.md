@@ -17,24 +17,14 @@ Create a high-quality food photograph of [DISH_TYPE] in a cartoonish, stylized a
 Create a high-quality food photograph of grilled chicken breast or chicken dish in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show golden-brown, juicy chicken with herbs or garnish. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
 ```
 
-**Beef (beef.png):**
+**Meat (meat.png):**
 ```
-Create a high-quality food photograph of a beef steak or beef dish in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show a perfectly cooked beef cut with nice grill marks or searing. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
-```
-
-**Pork (pork.png):**
-```
-Create a high-quality food photograph of pork chops or pork dish in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show tender, well-cooked pork with natural coloring and appealing presentation. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
+Create a high-quality food photograph of grilled meat (beef steak, pork chops, or similar meat dish) in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show perfectly cooked meat with nice grill marks or searing, natural meat coloring, and appealing presentation. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
 ```
 
 **Fish (fish.png):**
 ```
-Create a high-quality food photograph of grilled salmon or fish fillet in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show flaky, perfectly cooked fish with natural salmon pink or white fish coloring. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
-```
-
-**Seafood (seafood.png):**
-```
-Create a high-quality food photograph of mixed seafood (shrimp, crab, mussels) in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show colorful seafood with natural oceanic colors - pink shrimp, orange crab shells. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
+Create a high-quality food photograph of fish and seafood (grilled salmon, fish fillet, shrimp, or mixed seafood) in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show flaky, perfectly cooked fish with natural salmon pink or white fish coloring, or colorful seafood with oceanic colors. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
 ```
 
 ### Dish-Type Categories
@@ -78,14 +68,9 @@ Create a high-quality food photograph of an indulgent dessert like chocolate cak
 
 ### Dietary Categories
 
-**Vegetarian (vegetarian.png):**
-```
-Create a high-quality food photograph of a colorful vegetarian dish with roasted vegetables in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show a variety of colorful vegetables, grains, and plant-based ingredients arranged beautifully. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
-```
-
 **Vegan (vegan.png):**
 ```
-Create a high-quality food photograph of a vibrant vegan bowl with quinoa, vegetables, and plant-based proteins in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show colorful plant-based ingredients, nuts, seeds, and fresh vegetables. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
+Create a high-quality food photograph of a vibrant vegan/vegetarian bowl with quinoa, vegetables, and plant-based proteins in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show colorful plant-based ingredients, nuts, seeds, fresh vegetables, and grains. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
 ```
 
 ### Specific Dish Categories
@@ -93,21 +78,6 @@ Create a high-quality food photograph of a vibrant vegan bowl with quinoa, veget
 **Rice (rice.png):**
 ```
 Create a high-quality food photograph of fried rice or rice bowl with vegetables in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show fluffy rice with colorful vegetables, perhaps in a wok or bowl. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
-```
-
-**Stir-fry (stir-fry.png):**
-```
-Create a high-quality food photograph of a colorful vegetable stir-fry in a wok in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show vibrant vegetables being tossed in a wok with steam and movement. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
-```
-
-**Curry (curry.png):**
-```
-Create a high-quality food photograph of a rich, aromatic curry in a bowl in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show a creamy or spiced curry with vibrant orange, yellow, or red colors, perhaps with rice on the side. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
-```
-
-**Bread (bread.png):**
-```
-Create a high-quality food photograph of fresh artisan bread or toast in a cartoonish, stylized art style. The image should be 800x600 pixels, well-lit, appetizing, and centered in the frame. Show golden-brown crust, perhaps sliced to show the soft interior, with appealing texture. Use vibrant colors and clean composition. The style should be slightly animated/illustrated but still realistic enough to represent actual food. No text, watermarks, or people in the image.
 ```
 
 **Smoothie (smoothie.png):**

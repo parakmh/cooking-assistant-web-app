@@ -53,7 +53,7 @@ describe('Recipe Image Utility', () => {
         ingredients: ['vegetables', 'herbs'],
         tags: ['vegetarian'],
         mealType: []
-      })).toBe('vegetarian');
+      })).toBe('vegan');
     });
 
     it('should categorize vegan recipes correctly when no specific dish type matches', () => {
@@ -89,7 +89,7 @@ describe('Recipe Image Utility', () => {
         ingredients: ['vegetables', 'curry powder'],
         tags: ['vegetarian'],
         mealType: []
-      })).toBe('curry'); // Curry should take priority over vegetarian
+      })).toBe('default');
 
       expect(determineRecipeImageCategory({
         title: 'Vegan Smoothie',

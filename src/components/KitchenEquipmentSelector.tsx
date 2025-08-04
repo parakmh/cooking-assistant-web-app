@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Wind, Flame } from "lucide-react";
+import { Wind, Flame, ChefHat } from "lucide-react";
 
 interface KitchenEquipmentSelectorProps {
   selectedEquipment: string[];
@@ -7,40 +7,63 @@ interface KitchenEquipmentSelectorProps {
 }
 
 const equipmentTypes = [
-  { id: "airfryer", label: "Air Fryer", icon: Wind },
-  { id: "stove", label: "Stove", icon: Flame },
-  { id: "oven", label: "Oven", icon: "oven" as any },
+  { 
+    id: "airfryer", 
+    label: "Air Fryer", 
+    icon: Wind, 
+    color: "from-cyan-400 to-blue-500",
+    description: "Quick & crispy"
+  },
+  { 
+    id: "stove", 
+    label: "Stove Top", 
+    icon: Flame, 
+    color: "from-orange-400 to-red-500",
+    description: "Pan cooking"
+  },
+  { 
+    id: "oven", 
+    label: "Oven", 
+    icon: ChefHat, 
+    color: "from-amber-400 to-orange-500",
+    description: "Bake & roast"
+  },
 ];
 
 const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: KitchenEquipmentSelectorProps) => {
-  const toggleEquipment = (equipmentId: string) => {
-    const isSelected = selectedEquipment.includes(equipmentId);
-    if (isSelected) {
-      onEquipmentChange(selectedEquipment.filter(id => id !== equipmentId));
+  const toggleEquipment = (equipment: string) => {
+    if (selectedEquipment.includes(equipment)) {
+      onEquipmentChange(selectedEquipment.filter(item => item !== equipment));
     } else {
-      onEquipmentChange([...selectedEquipment, equipmentId]);
+      onEquipmentChange([...selectedEquipment, equipment]);
     }
   };
 
   return (
-    <div className="flex gap-2 flex-wrap justify-center">
-      {equipmentTypes.map((equipment) => (
-        <Button
-          key={equipment.id}
-          variant={selectedEquipment.includes(equipment.id) ? "default" : "outline"}
-          size="icon"
-          onClick={() => toggleEquipment(equipment.id)}
-          className={`h-12 w-12 text-kitchen-dark transition-all duration-150 ease-in-out transform hover:scale-110 ${selectedEquipment.includes(equipment.id) ? 'bg-kitchen-green-dark text-white ring-2 ring-kitchen-green-darker' : 'bg-white/90 hover:bg-white/80 border-white/30'}`}
-        >
-          {equipment.icon === "oven" ? (
-            <div className="h-6 w-6 border-2 border-current rounded-sm flex items-center justify-center">
-              <div className="h-3 w-3 border border-current rounded-xs"></div>
-            </div>
-          ) : (
-            <equipment.icon className="h-6 w-6" />
-          )}
-        </Button>
-      ))}
+    <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+      {equipmentTypes.map((equipment) => {
+        const isSelected = selectedEquipment.includes(equipment.id);
+        return (
+          <Button
+            key={equipment.id}
+            variant="ghost"
+            onClick={() => toggleEquipment(equipment.id)}
+            className={`flex flex-col h-20 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+              isSelected 
+                ? `bg-gradient-to-br ${equipment.color} text-white shadow-lg ring-2 ring-white/50` 
+                : 'bg-white/90 hover:bg-white text-kitchen-dark border border-white/50 hover:shadow-md'
+            }`}
+          >
+            <equipment.icon className={`h-4 w-4 mb-1 ${isSelected ? 'text-white' : 'text-kitchen-dark'}`} />
+            <span className={`text-xs font-medium mb-0.5 leading-tight ${isSelected ? 'text-white' : 'text-kitchen-dark'}`}>
+              {equipment.label}
+            </span>
+            <span className={`text-xs opacity-80 text-center leading-tight ${isSelected ? 'text-white/90' : 'text-kitchen-dark/70'}`}>
+              {equipment.description}
+            </span>
+          </Button>
+        );
+      })}
     </div>
   );
 };

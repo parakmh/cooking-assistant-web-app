@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apiGet, apiPost, apiDelete, InventoryItemData } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, InventoryItemData, UserData } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast"; // Ensure useToast is imported
 import { format } from "date-fns"; // For formatting date
 import { cn } from "@/lib/utils"; // For conditional classes
@@ -39,6 +39,7 @@ import IngredientItem from "@/components/IngredientItem"; // IngredientItem comp
 import IngredientTag from "@/components/IngredientTag"; // IngredientTag component
 import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector"; // KitchenEquipmentSelector component
 import MealTypeSelector from "@/components/MealTypeSelector"; // MealTypeSelector component
+import CookingTimeSelector from "@/components/CookingTimeSelector"; // CookingTimeSelector component
 import { CalendarIcon, Clock, Plus, Search, Upload, Loader2, ChefHat, Sparkles } from "lucide-react"; // Icons
 import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
 
@@ -90,9 +91,10 @@ const Index = () => {
   const [ingredientInput, setIngredientInput] = useState("");
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [isQuickCooking, setIsQuickCooking] = useState(false);
+  const [cookingTime, setCookingTime] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
+  const [selectedDietaryPreferences, setSelectedDietaryPreferences] = useState<string[]>([]);
   const navigate = useNavigate();
   
   // New ingredient form state
@@ -131,6 +133,33 @@ const Index = () => {
     };
     fetchInventory();
   }, [toast, isAuthenticated]);
+
+  // Fetch user profile to pre-select dietary preferences
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSelectedDietaryPreferences([]);
+      return;
+    }
+
+    const fetchUserProfile = async () => {
+      try {
+        const userData = await apiGet<any>("/auth/me");
+        console.log("User profile data:", userData); // Debug log
+        
+        // Handle both camelCase and snake_case from backend
+        const dietaryPrefs = userData.profile?.dietaryPreferences || userData.profile?.dietary_preferences || [];
+        console.log("Dietary preferences found:", dietaryPrefs); // Debug log
+        
+        if (dietaryPrefs.length > 0) {
+          setSelectedDietaryPreferences(dietaryPrefs);
+        }
+      } catch (error: any) {
+        console.error("Failed to fetch user profile:", error);
+        // Don't show toast for this as it's not critical
+      }
+    };
+    fetchUserProfile();
+  }, [isAuthenticated]);
   
   // Filter inventory based on search and category
   const filteredInventory = inventory.filter(item => {
@@ -255,8 +284,9 @@ const Index = () => {
     const apiParams: Record<string, string | number | boolean | undefined> = {
       ingredients: ingredientTags.length > 0 ? ingredientTags.join(',') : "",
       mealType: mealType || "", 
-      maxPrepTime: isQuickCooking ? "quick" : "any time",
+      maxPrepTime: cookingTime || "any",
       kitchenEquipment: selectedEquipment.length > 0 ? selectedEquipment.join(',') : "",
+      dietaryRestrictions: selectedDietaryPreferences.length > 0 ? selectedDietaryPreferences.join(',') : "",
       page: 1,
       limit: 10,
     };
@@ -284,9 +314,10 @@ const Index = () => {
       setIngredientInput("");
       setIngredientTags([]);
       setSelectedIngredients([]);
-      setIsQuickCooking(false);
+      setCookingTime("");
       setSelectedEquipment(kitchenEquipment.map(tool => tool.id)); // Reset equipment selector
       setMealType("");
+      // Don't reset dietary preferences as they should persist from user profile
 
     } catch (error: any) {
       console.error("Failed to fetch recipes:", error);
@@ -320,18 +351,21 @@ const Index = () => {
             </p>
             
             {/* Recipe Generation Form */}
-            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-8 text-left">
+            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-10 text-left">
 
               {/* Section 1: Ingredients */}
-              <div className="bg-black/5 p-4 rounded-lg space-y-4">
-                <h3 className="text-xl font-semibold text-white">1. What do you have?</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">1</div>
+                  <h3 className="text-xl font-semibold text-white">What do you have?</h3>
+                </div>
                 <div className="bg-black/5 p-4 rounded-lg">
                   <Input 
-                    placeholder="Type ingredient and press Enter or comma..."
+                    placeholder="Add ingredients..."
                     value={ingredientInput}
                     onChange={(e) => setIngredientInput(e.target.value)}
                     onKeyDown={handleIngredientInputKeyDown}
-                    className="bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange"
+                    className="w-full bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange border-white/30 focus:border-kitchen-orange text-base px-3 py-2"
                   />
                   {ingredientTags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
@@ -349,24 +383,24 @@ const Index = () => {
 
               {/* Section 2: Preferences */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">2. Your Preferences</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/5 p-4 rounded-lg">
-                  <div className="space-y-2 flex flex-col items-center">
-                    <label className="text-sm font-medium text-white block">Cooking Time</label>
-                    <Button
-                      variant={isQuickCooking ? "secondary" : "outline"}
-                      onClick={() => setIsQuickCooking(!isQuickCooking)}
-                      className="bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange flex items-center justify-center gap-2 px-4 w-32"
-                    >
-                      <Clock className="h-4 w-4" />
-                      {isQuickCooking ? "Quick" : "Any Time"}
-                    </Button>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">2</div>
+                  <h3 className="text-xl font-semibold text-white">Your Preferences</h3>
+                </div>
+                <div className="grid grid-cols-1 gap-6 bg-black/5 p-6 rounded-lg">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-white block text-center">Cooking Time</label>
+                    <CookingTimeSelector
+                      selectedCookingTime={cookingTime}
+                      onCookingTimeChange={setCookingTime}
+                    />
                   </div>
-                  <div className="space-y-2 flex flex-col items-center">
-                    <label className="text-sm font-medium text-white block">Meal Type</label>
+                  <div className="space-y-3">
                     <MealTypeSelector
                       selectedMealType={mealType}
                       onMealTypeChange={setMealType}
+                      selectedDietaryPreferences={selectedDietaryPreferences}
+                      onDietaryPreferencesChange={setSelectedDietaryPreferences}
                     />
                   </div>
                 </div>
@@ -374,31 +408,37 @@ const Index = () => {
 
               {/* Section 3: Kitchen Equipment */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">3. Kitchen Equipment</h3>
-                <div className="bg-black/5 p-4 rounded-lg flex justify-center">
-                  <KitchenEquipmentSelector
-                    selectedEquipment={selectedEquipment}
-                    onEquipmentChange={setSelectedEquipment}
-                  />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">3</div>
+                  <h3 className="text-xl font-semibold text-white">Kitchen Equipment</h3>
+                </div>
+                <div className="bg-black/5 p-6 rounded-lg">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-white block text-center">Available Equipment</label>
+                    <KitchenEquipmentSelector
+                      selectedEquipment={selectedEquipment}
+                      onEquipmentChange={setSelectedEquipment}
+                    />
+                  </div>
                 </div>
               </div>
               
               {/* Generate Button */}
-              <div className="flex justify-center">
+              <div className="flex justify-center pt-4">
                 <Button 
                   onClick={handleGenerateRecipes}
                   disabled={isGeneratingRecipes}
-                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                  className="bg-gradient-to-r from-kitchen-orange to-kitchen-orange/90 hover:from-kitchen-orange/90 hover:to-kitchen-orange text-white font-bold py-4 px-8 text-lg rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-w-[280px]"
                 >
                   {isGeneratingRecipes ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Finding Recipes...
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                      Finding Perfect Recipes...
                     </>
                   ) : (
                     <>
-                      <ChefHat className="mr-2 h-5 w-5" />
-                      Find My Perfect Recipe!
+                      <Sparkles className="mr-3 h-6 w-6" />
+                      Generate My Recipe!
                     </>
                   )}
                 </Button>

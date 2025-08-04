@@ -39,8 +39,25 @@ const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: Kitc
     }
   };
 
+  // Shared button styles to match other components
+  const getButtonClassName = (isSelected: boolean, color: string) => 
+    `flex flex-col h-20 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+      isSelected 
+        ? `bg-gradient-to-br ${color} text-white shadow-lg ring-2 ring-white/50` 
+        : 'bg-white/90 hover:bg-white text-kitchen-dark border border-white/50 hover:shadow-md'
+    }`;
+
+  const getIconClassName = (isSelected: boolean) => 
+    `h-4 w-4 mb-1 ${isSelected ? 'text-white' : 'text-kitchen-dark'}`;
+
+  const getTextClassName = (isSelected: boolean) => 
+    `text-xs font-medium leading-tight text-center ${isSelected ? 'text-white' : 'text-kitchen-dark'}`;
+
+  const getDescriptionClassName = (isSelected: boolean) => 
+    `text-xs opacity-80 leading-tight text-center ${isSelected ? 'text-white/90' : 'text-kitchen-dark/70'}`;
+
   return (
-    <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+    <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
       {equipmentTypes.map((equipment) => {
         const isSelected = selectedEquipment.includes(equipment.id);
         return (
@@ -48,17 +65,13 @@ const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: Kitc
             key={equipment.id}
             variant="ghost"
             onClick={() => toggleEquipment(equipment.id)}
-            className={`flex flex-col h-20 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
-              isSelected 
-                ? `bg-gradient-to-br ${equipment.color} text-white shadow-lg ring-2 ring-white/50` 
-                : 'bg-white/90 hover:bg-white text-kitchen-dark border border-white/50 hover:shadow-md'
-            }`}
+            className={getButtonClassName(isSelected, equipment.color)}
           >
-            <equipment.icon className={`h-4 w-4 mb-1 ${isSelected ? 'text-white' : 'text-kitchen-dark'}`} />
-            <span className={`text-xs font-medium mb-0.5 leading-tight ${isSelected ? 'text-white' : 'text-kitchen-dark'}`}>
+            <equipment.icon className={getIconClassName(isSelected)} />
+            <span className={getTextClassName(isSelected)}>
               {equipment.label}
             </span>
-            <span className={`text-xs opacity-80 text-center leading-tight ${isSelected ? 'text-white/90' : 'text-kitchen-dark/70'}`}>
+            <span className={getDescriptionClassName(isSelected)}>
               {equipment.description}
             </span>
           </Button>

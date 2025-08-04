@@ -369,13 +369,13 @@ const Index = () => {
                   />
                   {ingredientTags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
-                      {ingredientTags.map((ingredient, index) => (
-                        <IngredientTag
-                          key={index}
-                          ingredient={ingredient}
-                          onRemove={() => removeIngredientTag(ingredient)}
-                        />
-                      ))}
+                        {ingredientTags.map((ingredient, index) => (
+                          <IngredientTag
+                            key={index}
+                            ingredient={ingredient}
+                            onRemove={() => removeIngredientTag(ingredient)}
+                          />
+                        ))}
                     </div>
                   )}
                 </div>

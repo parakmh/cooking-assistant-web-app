@@ -356,18 +356,27 @@ const Index = () => {
 
               {/* Section 1: Ingredients */}
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center text-white font-bold shadow-lg">1</div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 border-2 border-green-700 rounded-full flex items-center justify-center text-green-700 font-bold shadow-lg bg-white/90">1</div>
                   <h3 className="text-xl font-semibold text-slate-900">What do you have?</h3>
                 </div>
-                <div className="bg-green-50/70 p-4 rounded-xl border border-green-200">
-                  <Input 
-                    placeholder="Add ingredients..."
-                    value={ingredientInput}
-                    onChange={(e) => setIngredientInput(e.target.value)}
-                    onKeyDown={handleIngredientInputKeyDown}
-                    className="w-full bg-white text-slate-900 placeholder-slate-500 focus:ring-2 focus:ring-green-600 border-green-300 focus:border-green-600 text-base px-4 py-3 shadow-sm rounded-lg"
-                  />
+                <div className="relative">
+                  {/* Beautiful gradient background container */}
+                  <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 p-6 rounded-2xl shadow-sm backdrop-blur-sm">
+                    {/* Search icon and input container */}
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <ChefHat className="h-5 w-5 text-green-600" />
+                      </div>
+                      <Input 
+                        placeholder="Add ingredients..."
+                        value={ingredientInput}
+                        onChange={(e) => setIngredientInput(e.target.value)}
+                        onKeyDown={handleIngredientInputKeyDown}
+                        className="w-full bg-white/90 backdrop-blur-sm text-slate-900 placeholder-slate-400 focus:ring-0 border-green-200 focus:border-green-200 text-base pl-12 pr-4 py-4 shadow-sm rounded-xl transition-all duration-200 focus:shadow-md relative focus:outline-none"
+                      />
+                    </div>
+                  </div>
                   {ingredientTags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
                         {ingredientTags.map((ingredient, index) => (
@@ -385,7 +394,7 @@ const Index = () => {
               {/* Section 2: Preferences */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center text-white font-bold shadow-lg">2</div>
+                  <div className="w-8 h-8 border-2 border-green-700 rounded-full flex items-center justify-center text-green-700 font-bold shadow-lg bg-white/90">2</div>
                   <h3 className="text-xl font-semibold text-slate-900">Your Preferences</h3>
                 </div>
                 <div className="grid grid-cols-1 gap-6 bg-green-50/70 p-6 rounded-xl border border-green-200">
@@ -410,7 +419,7 @@ const Index = () => {
               {/* Section 3: Kitchen Equipment */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center text-white font-bold shadow-lg">3</div>
+                  <div className="w-8 h-8 border-2 border-green-700 rounded-full flex items-center justify-center text-green-700 font-bold shadow-lg bg-white/90">3</div>
                   <h3 className="text-xl font-semibold text-slate-900">Kitchen Equipment</h3>
                 </div>
                 <div className="bg-green-50/70 p-6 rounded-xl border border-green-200">

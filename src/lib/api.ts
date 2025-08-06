@@ -19,6 +19,36 @@ export const removeToken = (): void => {
   localStorage.removeItem('authToken');
 };
 
+// Token validation utility
+export const isTokenExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp < currentTime;
+  } catch (error) {
+    console.error('Error parsing token:', error);
+    return true; // Assume expired if we can't parse it
+  }
+};
+
+// Enhanced token getter that checks expiration
+export const getValidToken = (): string | null => {
+  const token = getToken();
+  if (!token) return null;
+  
+  if (isTokenExpired(token)) {
+    console.warn('Token expired, removing from storage');
+    removeToken();
+    // Trigger global logout
+    window.dispatchEvent(new CustomEvent('auth:logout', { 
+      detail: { reason: 'token_expired_on_check' } 
+    }));
+    return null;
+  }
+  
+  return token;
+};
+
 interface ApiCallOptions extends RequestInit {
   needsAuth?: boolean;
   isFormData?: boolean;
@@ -37,13 +67,18 @@ export const apiCall = async <T = any>(
   headers.append('Accept', 'application/json');
 
   if (needsAuth) {
-    const token = getToken();
+    const token = getValidToken(); // Use enhanced token getter
     if (token) {
       headers.append('Authorization', `Bearer ${token}`);
     } else {
-      // Handle cases where auth is needed but token is not available
-      // For now, let it proceed, backend will return 401
-      console.warn(`Auth token not found for protected route: ${endpoint}`);
+      // Handle cases where auth is needed but token is not available or expired
+      console.warn(`Valid auth token not found for protected route: ${endpoint}`);
+      // Don't proceed with the request if no valid token for protected routes
+      throw { 
+        status: 401, 
+        data: { message: 'Authentication required' }, 
+        response: null 
+      };
     }
   }
 
@@ -59,7 +94,17 @@ export const apiCall = async <T = any>(
     } catch (e) {
       errorData = { message: response.statusText };
     }
-    // You might want to customize error handling, e.g., redirect on 401
+    
+    // Handle 401 Unauthorized - token expired or invalid
+    if (response.status === 401 && needsAuth) {
+      console.warn('Token expired or unauthorized, clearing auth state');
+      removeToken();
+      // Trigger global logout by dispatching a custom event
+      window.dispatchEvent(new CustomEvent('auth:logout', { 
+        detail: { reason: 'token_expired' } 
+      }));
+    }
+    
     console.error('API Error:', response.status, errorData);
     throw { status: response.status, data: errorData, response };
   }

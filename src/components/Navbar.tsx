@@ -16,7 +16,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/", icon: <Home className="size-4" />, show: 'always' },
-    { name: "Recipes History", path: "/recipes", icon: <Calendar className="size-4" />, show: 'always' },
+    { name: "Recipes History", path: "/recipes", icon: <Calendar className="size-4" />, show: 'auth' },
     { name: "Profile", path: "/profile", icon: <User className="size-4" />, show: 'auth' },
   ];
 

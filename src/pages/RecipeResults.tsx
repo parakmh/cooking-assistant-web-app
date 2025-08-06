@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import RecipeCard from '@/components/RecipeCard'; // Import RecipeCard
 import { RecipeSuggestion, getBackendDomain } from '@/lib/api';
+import { getRecipeImageUrl } from '@/lib/recipeImages';
 import {
   Dialog,
   DialogContent,
@@ -17,23 +18,30 @@ import { Clock, Users } from 'lucide-react';
 interface RecipeCardRecipe {
   id: string;
   title: string;
-  imageUrl: string;
+  imageUrl?: string; // Made optional since we generate it
   cookTime: string;
   servings: number;
   difficulty: "easy" | "medium" | "hard";
   tags: string[];
-  // Add other properties if your RecipeCard uses them, e.g., ingredients, kitchenEquipmentNeeded
+  ingredients?: Array<{ name: string; quantity: string; unit: string }>;
+  mealType?: string[];
+  cuisine?: string;
+  name?: string;
 }
 
 // Helper function to transform backend suggestion to RecipeCardRecipe format
 const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): RecipeCardRecipe => ({
   id: suggestion.id,
   title: suggestion.name,
-  imageUrl: suggestion.imageUrl || '/placeholder.svg',
+  name: suggestion.name,
   cookTime: `${(suggestion.prepTimeMinutes || 0) + (suggestion.cookTimeMinutes || 0)} mins`,
   servings: suggestion.servings,
   difficulty: suggestion.difficulty.toLowerCase() as "easy" | "medium" | "hard", // Ensure lowercase and type assertion
   tags: suggestion.tags || [],
+  ingredients: suggestion.ingredients,
+  mealType: suggestion.mealType,
+  cuisine: suggestion.cuisine,
+  // Don't pass imageUrl - let the new system determine the appropriate image
 });
 
 const RecipeResults = () => {
@@ -42,9 +50,9 @@ const RecipeResults = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Ensure results and suggestedForYou are properly destructured and have defaults
-  const { queryParams, results } = location.state || { queryParams: {}, results: { recipes: [], suggestedForYou: [] } };
+  const { queryParams, results } = location.state || { queryParams: {}, results: { results: [], suggestedForYou: [] } };
   const suggestions: RecipeSuggestion[] = results.suggestedForYou || [];
-  const recipesFromSearch = results.recipes || []; // Assuming 'recipes' is the key for main search results
+  const recipesFromSearch: RecipeSuggestion[] = results.results || []; // Changed from results.recipes to results.results and added type
 
   // Log queryParams to the console
   useEffect(() => {
@@ -117,7 +125,14 @@ const RecipeResults = () => {
                 </DialogDescription>
               </DialogHeader>
               <img
-                src={selectedRecipe.imageUrl && selectedRecipe.imageUrl.startsWith('/') ? `${getBackendDomain()}${selectedRecipe.imageUrl}` : (selectedRecipe.imageUrl || '/placeholder.svg')}
+                src={getRecipeImageUrl({
+                  name: selectedRecipe.name,
+                  ingredients: selectedRecipe.ingredients,
+                  tags: selectedRecipe.tags,
+                  mealType: selectedRecipe.mealType,
+                  cuisine: selectedRecipe.cuisine,
+                  imageUrl: selectedRecipe.imageUrl
+                })}
                 alt={selectedRecipe.name}
                 className="w-full h-64 object-cover rounded-lg mb-6"
               />

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeAll, afterEach, afterAll, beforeEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { screen, waitFor } from '@testing-library/react'
 import Inventory from '@/pages/Inventory'
@@ -6,9 +6,39 @@ import { renderWithProviders } from '../utils'
 import { server } from '../mocks/server'
 import { http, HttpResponse } from 'msw'
 
+// Helper to create a valid JWT token for testing
+const createValidToken = () => {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = btoa(JSON.stringify({ 
+    user_id: 1, 
+    exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+  }));
+  const signature = 'mock-signature';
+  return `${header}.${payload}.${signature}`;
+};
+
 describe('Inventory Page', () => {
   beforeAll(() => server.listen())
-  afterEach(() => server.resetHandlers())
+  
+  beforeEach(() => {
+    // Mock localStorage with a valid auth token for each test
+    const mockToken = createValidToken();
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: vi.fn().mockReturnValue(mockToken),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    server.resetHandlers();
+    vi.restoreAllMocks();
+  });
+
   afterAll(() => server.close())
 
   it('renders inventory page and items', async () => {

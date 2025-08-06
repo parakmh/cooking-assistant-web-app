@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apiGet, apiPost, apiDelete, InventoryItemData } from "@/lib/api"; // Added apiPost, apiDelete
+import { apiGet, apiPost, apiDelete, InventoryItemData, UserData } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast"; // Ensure useToast is imported
 import { format } from "date-fns"; // For formatting date
 import { cn } from "@/lib/utils"; // For conditional classes
@@ -39,8 +39,9 @@ import IngredientItem from "@/components/IngredientItem"; // IngredientItem comp
 import IngredientTag from "@/components/IngredientTag"; // IngredientTag component
 import KitchenEquipmentSelector from "@/components/KitchenEquipmentSelector"; // KitchenEquipmentSelector component
 import MealTypeSelector from "@/components/MealTypeSelector"; // MealTypeSelector component
-import { CalendarIcon, Clock, Plus, Search, Upload } from "lucide-react"; // Icons
-import { useAuth } from "@/hooks/useAuth"; // Assuming useAuth hook provides user profile
+import CookingTimeSelector from "@/components/CookingTimeSelector"; // CookingTimeSelector component
+import { CalendarIcon, Clock, Plus, Search, Upload, Loader2, ChefHat, Sparkles } from "lucide-react"; // Icons
+import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
 
 
 // Categories for filtering
@@ -76,10 +77,11 @@ const kitchenEquipment = [
 
 const Index = () => {
   const { toast } = useToast();
-  const { user } = useAuth(); // Assuming useAuth provides user data including profile
+  const { isAuthenticated } = useAuth();
   const [inventory, setInventory] = useState<InventoryItemData[]>([]); // Use InventoryItemData type
   const [isLoadingInventory, setIsLoadingInventory] = useState(true); // Added loading state for inventory
   const [isSubmittingIngredient, setIsSubmittingIngredient] = useState(false); // Added for add ingredient loading
+  const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false); // Added for recipe generation loading
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -89,9 +91,10 @@ const Index = () => {
   const [ingredientInput, setIngredientInput] = useState("");
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [isQuickCooking, setIsQuickCooking] = useState(false);
+  const [cookingTime, setCookingTime] = useState("any");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>(kitchenEquipment.map(tool => tool.id));
   const [mealType, setMealType] = useState("");
+  const [selectedDietaryPreferences, setSelectedDietaryPreferences] = useState<string[]>([]);
   const navigate = useNavigate();
   
   // New ingredient form state
@@ -103,8 +106,14 @@ const Index = () => {
     expiryDate: undefined as Date | undefined
   });
 
-  // Fetch inventory from backend
+  // Fetch inventory from backend - only when authenticated
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoadingInventory(false);
+      setInventory([]);
+      return;
+    }
+
     const fetchInventory = async () => {
       setIsLoadingInventory(true);
       try {
@@ -123,7 +132,34 @@ const Index = () => {
       }
     };
     fetchInventory();
-  }, [toast]);
+  }, [toast, isAuthenticated]);
+
+  // Fetch user profile to pre-select dietary preferences
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSelectedDietaryPreferences([]);
+      return;
+    }
+
+    const fetchUserProfile = async () => {
+      try {
+        const userData = await apiGet<any>("/auth/me");
+        console.log("User profile data:", userData); // Debug log
+        
+        // Handle both camelCase and snake_case from backend
+        const dietaryPrefs = userData.profile?.dietaryPreferences || userData.profile?.dietary_preferences || [];
+        console.log("Dietary preferences found:", dietaryPrefs); // Debug log
+        
+        if (dietaryPrefs.length > 0) {
+          setSelectedDietaryPreferences(dietaryPrefs);
+        }
+      } catch (error: any) {
+        console.error("Failed to fetch user profile:", error);
+        // Don't show toast for this as it's not critical
+      }
+    };
+    fetchUserProfile();
+  }, [isAuthenticated]);
   
   // Filter inventory based on search and category
   const filteredInventory = inventory.filter(item => {
@@ -241,13 +277,16 @@ const Index = () => {
   };
   
   const handleGenerateRecipes = async () => { 
+    setIsGeneratingRecipes(true);
+    
     // apiParams is what we intend to send to the backend.
     // Optional fields to be omitted are set to 'undefined'.
     const apiParams: Record<string, string | number | boolean | undefined> = {
       ingredients: ingredientTags.length > 0 ? ingredientTags.join(',') : "",
       mealType: mealType || "", 
-      maxPrepTime: isQuickCooking ? "quick" : "any time",
+      maxPrepTime: cookingTime || "any",
       kitchenEquipment: selectedEquipment.length > 0 ? selectedEquipment.join(',') : "",
+      dietaryRestrictions: selectedDietaryPreferences.length > 0 ? selectedDietaryPreferences.join(',') : "",
       page: 1,
       limit: 10,
     };
@@ -275,9 +314,10 @@ const Index = () => {
       setIngredientInput("");
       setIngredientTags([]);
       setSelectedIngredients([]);
-      setIsQuickCooking(false);
+      setCookingTime("any");
       setSelectedEquipment(kitchenEquipment.map(tool => tool.id)); // Reset equipment selector
       setMealType("");
+      // Don't reset dietary preferences as they should persist from user profile
 
     } catch (error: any) {
       console.error("Failed to fetch recipes:", error);
@@ -286,6 +326,8 @@ const Index = () => {
         description: error.data?.message || "Could not fetch recipes. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingRecipes(false);
     }
   };
   
@@ -309,28 +351,31 @@ const Index = () => {
             </p>
             
             {/* Recipe Generation Form */}
-            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-8 text-left">
+            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-10 text-left">
 
               {/* Section 1: Ingredients */}
-              <div className="bg-black/5 p-4 rounded-lg space-y-4">
-                <h3 className="text-xl font-semibold text-white">1. What do you have?</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">1</div>
+                  <h3 className="text-xl font-semibold text-white">What do you have?</h3>
+                </div>
                 <div className="bg-black/5 p-4 rounded-lg">
                   <Input 
-                    placeholder="Type ingredient and press Enter or comma..."
+                    placeholder="Add ingredients..."
                     value={ingredientInput}
                     onChange={(e) => setIngredientInput(e.target.value)}
                     onKeyDown={handleIngredientInputKeyDown}
-                    className="bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange"
+                    className="w-full bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange border-white/30 focus:border-kitchen-orange text-base px-3 py-2"
                   />
                   {ingredientTags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
-                      {ingredientTags.map((ingredient, index) => (
-                        <IngredientTag
-                          key={index}
-                          ingredient={ingredient}
-                          onRemove={() => removeIngredientTag(ingredient)}
-                        />
-                      ))}
+                        {ingredientTags.map((ingredient, index) => (
+                          <IngredientTag
+                            key={index}
+                            ingredient={ingredient}
+                            onRemove={() => removeIngredientTag(ingredient)}
+                          />
+                        ))}
                     </div>
                   )}
                 </div>
@@ -338,24 +383,24 @@ const Index = () => {
 
               {/* Section 2: Preferences */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">2. Your Preferences</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/5 p-4 rounded-lg">
-                  <div className="space-y-2 flex flex-col items-center">
-                    <label className="text-sm font-medium text-white block">Cooking Time</label>
-                    <Button
-                      variant={isQuickCooking ? "secondary" : "outline"}
-                      onClick={() => setIsQuickCooking(!isQuickCooking)}
-                      className="bg-white/95 text-kitchen-dark hover:bg-white/90 border-white/40 hover:border-white/60 focus:ring-2 focus:ring-kitchen-orange flex items-center justify-center gap-2 px-4 w-32"
-                    >
-                      <Clock className="h-4 w-4" />
-                      {isQuickCooking ? "Quick" : "Any Time"}
-                    </Button>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">2</div>
+                  <h3 className="text-xl font-semibold text-white">Your Preferences</h3>
+                </div>
+                <div className="grid grid-cols-1 gap-6 bg-black/5 p-6 rounded-lg">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-white block text-center">Cooking Time</label>
+                    <CookingTimeSelector
+                      selectedCookingTime={cookingTime}
+                      onCookingTimeChange={setCookingTime}
+                    />
                   </div>
-                  <div className="space-y-2 flex flex-col items-center">
-                    <label className="text-sm font-medium text-white block">Meal Type</label>
+                  <div className="space-y-3">
                     <MealTypeSelector
                       selectedMealType={mealType}
                       onMealTypeChange={setMealType}
+                      selectedDietaryPreferences={selectedDietaryPreferences}
+                      onDietaryPreferencesChange={setSelectedDietaryPreferences}
                     />
                   </div>
                 </div>
@@ -363,22 +408,39 @@ const Index = () => {
 
               {/* Section 3: Kitchen Equipment */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">3. Kitchen Equipment</h3>
-                <div className="bg-black/5 p-4 rounded-lg flex justify-center">
-                  <KitchenEquipmentSelector
-                    selectedEquipment={selectedEquipment}
-                    onEquipmentChange={setSelectedEquipment}
-                  />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">3</div>
+                  <h3 className="text-xl font-semibold text-white">Kitchen Equipment</h3>
+                </div>
+                <div className="bg-black/5 p-6 rounded-lg">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-white block text-center">Available Equipment</label>
+                    <KitchenEquipmentSelector
+                      selectedEquipment={selectedEquipment}
+                      onEquipmentChange={setSelectedEquipment}
+                    />
+                  </div>
                 </div>
               </div>
               
               {/* Generate Button */}
-              <div className="flex justify-center">
+              <div className="flex justify-center pt-4">
                 <Button 
                   onClick={handleGenerateRecipes}
-                  className="bg-kitchen-orange hover:bg-kitchen-orange/90 text-white font-bold p-4 text-lg rounded-md shadow-xl transform hover:scale-105 transition-transform duration-150 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50"
+                  disabled={isGeneratingRecipes}
+                  className="bg-gradient-to-r from-kitchen-orange to-kitchen-orange/90 hover:from-kitchen-orange/90 hover:to-kitchen-orange text-white font-bold py-4 px-8 text-lg rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-w-[280px]"
                 >
-                  Find My Perfect Recipe!
+                  {isGeneratingRecipes ? (
+                    <>
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                      Finding Perfect Recipes...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-3 h-6 w-6" />
+                      Generate My Recipe!
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -386,8 +448,9 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Inventory Section */}
-      <section className="py-12 kitchen-container">
+      {/* Inventory Section - Only show if authenticated */}
+      {isAuthenticated && (
+        <section className="py-12 kitchen-container">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h2 className="text-3xl font-bold">Your Ingredients</h2>
@@ -647,6 +710,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
       
       {/* AI Features Section */}
       <section className="py-12 bg-kitchen-light">
@@ -696,6 +760,73 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Loading Dialog */}
+      <Dialog open={isGeneratingRecipes} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md border-0 bg-gradient-to-br from-kitchen-green/10 to-kitchen-orange/10 backdrop-blur-sm">
+          <DialogHeader className="text-center pb-0">
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-kitchen-green to-kitchen-orange bg-clip-text text-transparent">
+              Creating Your Perfect Recipe
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
+              Our AI is analyzing your ingredients and preferences...
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center justify-center py-8">
+            {/* Animated cooking elements */}
+            <div className="relative mb-6">
+              {/* Main spinner */}
+              <div className="relative">
+                <Loader2 className="h-16 w-16 animate-spin text-kitchen-orange" />
+                {/* Inner sparkle effect */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-kitchen-green animate-pulse" />
+                </div>
+              </div>
+              
+              {/* Floating ingredients animation */}
+              <div className="absolute -top-4 -left-4 w-4 h-4 bg-kitchen-green rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+              <div className="absolute -top-2 -right-6 w-3 h-3 bg-kitchen-orange rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute -bottom-4 -right-2 w-5 h-5 bg-kitchen-teal rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute -bottom-2 -left-6 w-2 h-2 bg-kitchen-green rounded-full animate-bounce" style={{ animationDelay: '1.5s' }}></div>
+            </div>
+
+            {/* Loading progress indicator */}
+            <div className="w-full max-w-xs mx-auto mb-4">
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-kitchen-green to-kitchen-orange rounded-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Loading messages */}
+            <div className="text-center space-y-2">
+              <p className="text-lg font-semibold text-kitchen-dark">
+                Analyzing ingredients...
+              </p>
+              <p className="text-sm text-muted-foreground animate-pulse">
+                This usually takes just a few seconds
+              </p>
+            </div>
+
+            {/* Recipe generation steps */}
+            <div className="mt-6 space-y-2 text-sm text-muted-foreground text-center">
+              <div className="flex items-center justify-center space-x-2 opacity-100">
+                <div className="w-2 h-2 bg-kitchen-green rounded-full animate-ping"></div>
+                <span>Matching with recipe database</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2 opacity-75">
+                <div className="w-2 h-2 bg-kitchen-orange rounded-full"></div>
+                <span>Calculating nutrition values</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2 opacity-50">
+                <div className="w-2 h-2 bg-kitchen-teal rounded-full"></div>
+                <span>Personalizing recommendations</span>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

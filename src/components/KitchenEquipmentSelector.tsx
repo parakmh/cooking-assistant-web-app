@@ -11,22 +11,19 @@ const equipmentTypes = [
     id: "airfryer", 
     label: "Air Fryer", 
     icon: Wind, 
-    color: "from-cyan-400 to-blue-500",
-    description: "Quick & crispy"
+    color: "from-cyan-400 to-blue-500"
   },
   { 
     id: "stove", 
     label: "Stove Top", 
     icon: Flame, 
-    color: "from-orange-400 to-red-500",
-    description: "Pan cooking"
+    color: "from-orange-400 to-red-500"
   },
   { 
     id: "oven", 
     label: "Oven", 
     icon: ChefHat, 
-    color: "from-amber-400 to-orange-500",
-    description: "Bake & roast"
+    color: "from-amber-400 to-orange-500"
   },
 ];
 
@@ -41,7 +38,7 @@ const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: Kitc
 
   // Shared button styles to match other components - forcing refresh
   const getButtonClassName = (isSelected: boolean, color: string) => 
-    `flex flex-col h-20 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+    `flex flex-col items-center justify-center h-16 w-16 p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
       isSelected 
         ? `border-2 shadow-lg` 
         : 'bg-gray-200 border-2 border-gray-300 hover:shadow-md hover:bg-gray-200'
@@ -54,11 +51,8 @@ const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: Kitc
   const getTextClassName = (isSelected: boolean) => 
     `text-xs font-medium leading-tight text-center ${isSelected ? 'text-[#E35336]' : 'text-gray-500'}`;
 
-  const getDescriptionClassName = (isSelected: boolean) => 
-    `text-xs opacity-80 leading-tight text-center ${isSelected ? 'text-[#E35336]/80' : 'text-gray-500/70'}`;
-
   return (
-    <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+    <div className="flex flex-wrap justify-center gap-3">
       {equipmentTypes.map((equipment) => {
         const isSelected = selectedEquipment.includes(equipment.id);
         return (
@@ -75,9 +69,6 @@ const KitchenEquipmentSelector = ({ selectedEquipment, onEquipmentChange }: Kitc
             <equipment.icon className={getIconClassName(isSelected)} />
             <span className={getTextClassName(isSelected)}>
               {equipment.label}
-            </span>
-            <span className={getDescriptionClassName(isSelected)}>
-              {equipment.description}
             </span>
           </Button>
         );

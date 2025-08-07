@@ -7,14 +7,14 @@ interface CookingTimeSelectorProps {
 }
 
 const cookingTimes = [
-  { id: "quick", label: "Quick (< 15 min)", icon: Zap, color: "from-orange-400 to-orange-500" },
+  { id: "quick", label: "< 15 min", icon: Zap, color: "from-orange-400 to-orange-500" },
   { id: "any", label: "Any Time", icon: Timer, color: "from-orange-400 to-orange-500" },
 ];
 
 const CookingTimeSelector = ({ selectedCookingTime, onCookingTimeChange }: CookingTimeSelectorProps) => {
   // Shared button styles to match MealTypeSelector - forcing refresh
   const getButtonClassName = (isSelected: boolean, color: string) => 
-    `flex flex-col h-16 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+    `flex flex-col items-center justify-center h-16 w-16 p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
       isSelected 
         ? `border-2 shadow-lg` 
         : 'bg-gray-200 border-2 border-gray-300 hover:shadow-md hover:bg-gray-200'
@@ -31,7 +31,7 @@ const CookingTimeSelector = ({ selectedCookingTime, onCookingTimeChange }: Cooki
     `text-xs opacity-80 leading-tight text-center ${isSelected ? 'text-white/90' : 'text-kitchen-dark/70'}`;
 
   return (
-    <div className="grid grid-cols-2 gap-3 max-w-60 mx-auto">
+    <div className="flex flex-wrap justify-center gap-3">
       {cookingTimes.map((timeOption) => {
         const isSelected = selectedCookingTime === timeOption.id;
         return (

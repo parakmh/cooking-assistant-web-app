@@ -48,7 +48,7 @@ const MealTypeSelector = ({
 
   // Shared button styles to ensure consistency - forcing refresh
   const getButtonClassName = (isSelected: boolean, color: string, isDietary: boolean = false) => 
-    `flex flex-col h-16 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+    `flex flex-col items-center justify-center h-16 w-16 p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
       isSelected 
         ? `border-2 shadow-lg` 
         : 'bg-gray-200 border-2 border-gray-300 hover:shadow-md hover:bg-gray-200'
@@ -66,7 +66,7 @@ const MealTypeSelector = ({
       {/* Meal Types */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-slate-700 block text-center">Meal Type</h4>
-        <div className="flex flex-wrap justify-center sm:grid sm:grid-cols-5 gap-3 max-w-xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-3">
           {mealTypesOnly.map((mealType) => {
             const isSelected = selectedMealType === mealType.id;
             return (
@@ -74,10 +74,7 @@ const MealTypeSelector = ({
                 key={mealType.id}
                 variant="ghost"
                 onClick={() => onMealTypeChange(selectedMealType === mealType.id ? "" : mealType.id)}
-                className={`${getButtonClassName(isSelected, mealType.color)} ${
-                  // Fixed width for mobile to ensure consistent sizing
-                  'w-20 sm:w-full'
-                }`}
+                className={`${getButtonClassName(isSelected, mealType.color)}`}
                 style={isSelected ? {
                   backgroundColor: '#E35336' + '1A', // 10% opacity
                   borderColor: '#E35336'
@@ -118,7 +115,7 @@ const MealTypeSelector = ({
         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
           isDietaryExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-2xl mx-auto pt-2">
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
             {dietaryOptions.map((dietary) => {
               const isSelected = selectedDietaryPreferences.includes(dietary.id);
               return (

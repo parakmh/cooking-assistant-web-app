@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Calendar, User, LogIn, LogOut, UserPlus } from "lucide-react";
+import { Home, Calendar, User, LogIn, LogOut, UserPlus, ChefHat } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
@@ -16,6 +16,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/", icon: <Home className="size-4" />, show: 'always' },
+    { name: "Inventory", path: "/inventory", icon: <ChefHat className="size-4" />, show: 'auth' },
     { name: "Recipes History", path: "/recipes", icon: <Calendar className="size-4" />, show: 'auth' },
     { name: "Profile", path: "/profile", icon: <User className="size-4" />, show: 'auth' },
   ];

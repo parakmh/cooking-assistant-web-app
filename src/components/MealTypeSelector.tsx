@@ -46,25 +46,26 @@ const MealTypeSelector = ({
     onDietaryPreferencesChange(newPreferences);
   };
 
-  // Shared button styles to ensure consistency
-  const getButtonClassName = (isSelected: boolean, color: string) => 
+  // Shared button styles to ensure consistency - forcing refresh
+  const getButtonClassName = (isSelected: boolean, color: string, isDietary: boolean = false) => 
     `flex flex-col h-16 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
       isSelected 
-        ? `bg-gradient-to-br ${color} text-white shadow-lg ring-2 ring-white/50` 
-        : 'bg-white/90 hover:bg-white text-kitchen-dark border border-white/50 hover:shadow-md'
-    }`;
+        ? `border-2 shadow-lg` 
+        : 'bg-gray-200 border-2 border-gray-300 hover:shadow-md hover:bg-gray-200'
+    }`
+    + (isSelected ? ' hover:bg-[#E35336]/10' : '');
 
   const getIconClassName = (isSelected: boolean) => 
-    `h-4 w-4 mb-1 ${isSelected ? 'text-white' : 'text-kitchen-dark'}`;
+    `h-4 w-4 mb-1 ${isSelected ? 'text-[#E35336]' : 'text-gray-500'}`;
 
   const getTextClassName = (isSelected: boolean) => 
-    `text-xs font-medium leading-tight text-center ${isSelected ? 'text-white' : 'text-kitchen-dark'}`;
+    `text-xs font-medium leading-tight text-center ${isSelected ? 'text-[#E35336]' : 'text-gray-500'}`;
 
   return (
     <div className="space-y-4">
       {/* Meal Types */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-white block text-center">Meal Type</h4>
+        <h4 className="text-sm font-medium text-slate-700 block text-center">Meal Type</h4>
         <div className="flex flex-wrap justify-center sm:grid sm:grid-cols-5 gap-3 max-w-xl mx-auto">
           {mealTypesOnly.map((mealType) => {
             const isSelected = selectedMealType === mealType.id;
@@ -77,6 +78,10 @@ const MealTypeSelector = ({
                   // Fixed width for mobile to ensure consistent sizing
                   'w-20 sm:w-full'
                 }`}
+                style={isSelected ? {
+                  backgroundColor: '#E35336' + '1A', // 10% opacity
+                  borderColor: '#E35336'
+                } : {}}
               >
                 <mealType.icon className={getIconClassName(isSelected)} />
                 <span className={getTextClassName(isSelected)}>
@@ -92,18 +97,18 @@ const MealTypeSelector = ({
       <div className="space-y-3">
         <button
           onClick={() => setIsDietaryExpanded(!isDietaryExpanded)}
-          className="flex items-center justify-between w-full max-w-xs mx-auto p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200 border border-white/20 group backdrop-blur-sm"
+          className="flex items-center justify-between w-full max-w-xs mx-auto p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition-all duration-200 group"
         >
-          <span className="font-medium text-white text-sm">
+          <span className="font-medium text-slate-700 text-sm">
             Dietary Preferences
             {selectedDietaryPreferences.length > 0 && (
-              <span className="ml-2 text-xs text-green-300 font-normal">
+              <span className="ml-2 text-xs text-green-600 font-normal">
                 ({selectedDietaryPreferences.length} selected)
               </span>
             )}
           </span>
           <ChevronDown 
-            className={`w-4 h-4 text-white/70 transition-transform duration-200 group-hover:text-white ${
+            className={`w-4 h-4 text-slate-600 transition-transform duration-200 group-hover:text-slate-700 ${
               isDietaryExpanded ? 'rotate-180' : ''
             }`}
           />
@@ -122,6 +127,10 @@ const MealTypeSelector = ({
                   variant="ghost"
                   onClick={() => handleDietaryToggle(dietary.id)}
                   className={getButtonClassName(isSelected, dietary.color)}
+                  style={isSelected ? {
+                    backgroundColor: '#E35336' + '1A', // 10% opacity
+                    borderColor: '#E35336'
+                  } : {}}
                 >
                   <dietary.icon className={getIconClassName(isSelected)} />
                   <span className={getTextClassName(isSelected)}>

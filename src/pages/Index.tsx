@@ -341,32 +341,42 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-kitchen-green text-white py-16">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1495195134817-aeb325a55b65?auto=format&fit=crop&w=1920&h=600&q=80')] bg-cover bg-center opacity-20"></div>
+      <section className="relative bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white py-20">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1495195134817-aeb325a55b65?auto=format&fit=crop&w=1920&h=600&q=80')] bg-cover bg-center opacity-15"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 to-green-800/30"></div>
         <div className="kitchen-container relative z-10">
           <div className="max-w-4xl mx-auto text-center animate-fade-in">
-            <h1 className="text-4xl font-bold mb-6">Your AI-powered kitchen companion</h1>
-            <p className="text-xl mb-8">
+            <h1 className="text-5xl font-bold mb-6 text-white drop-shadow-lg">Your AI-powered kitchen companion</h1>
+            <p className="text-xl mb-8 text-green-100 max-w-2xl mx-auto drop-shadow-sm">
               Enter your ingredients and preferences, and let AI create the perfect recipe for you
             </p>
             
             {/* Recipe Generation Form */}
-            <div className="bg-kitchen-green/25 backdrop-blur-lg rounded-2xl p-8 shadow-2xl ring-1 ring-white/30 space-y-10 text-left">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl ring-1 ring-white/20 space-y-10 text-left border border-white/30">
 
               {/* Section 1: Ingredients */}
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">1</div>
-                  <h3 className="text-xl font-semibold text-white">What do you have?</h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 border-2 border-green-700 rounded-full flex items-center justify-center text-green-700 font-bold shadow-lg bg-white/90">1</div>
+                  <h3 className="text-xl font-semibold text-slate-900">What do you have?</h3>
                 </div>
-                <div className="bg-black/5 p-4 rounded-lg">
-                  <Input 
-                    placeholder="Add ingredients..."
-                    value={ingredientInput}
-                    onChange={(e) => setIngredientInput(e.target.value)}
-                    onKeyDown={handleIngredientInputKeyDown}
-                    className="w-full bg-white/95 text-kitchen-dark placeholder-gray-500 focus:ring-2 focus:ring-kitchen-orange border-white/30 focus:border-kitchen-orange text-base px-3 py-2"
-                  />
+                <div className="relative">
+                  {/* Beautiful gradient background container */}
+                  <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 p-6 rounded-2xl shadow-sm backdrop-blur-sm">
+                    {/* Search icon and input container */}
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <ChefHat className="h-5 w-5 text-green-600" />
+                      </div>
+                      <Input 
+                        placeholder="Add ingredients..."
+                        value={ingredientInput}
+                        onChange={(e) => setIngredientInput(e.target.value)}
+                        onKeyDown={handleIngredientInputKeyDown}
+                        className="w-full bg-white/90 backdrop-blur-sm text-slate-900 placeholder-slate-400 focus:ring-0 border-green-200 focus:border-green-200 text-base pl-12 pr-4 py-4 shadow-sm rounded-xl transition-all duration-200 focus:shadow-md relative focus:outline-none"
+                      />
+                    </div>
+                  </div>
                   {ingredientTags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
                         {ingredientTags.map((ingredient, index) => (
@@ -384,12 +394,12 @@ const Index = () => {
               {/* Section 2: Preferences */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">2</div>
-                  <h3 className="text-xl font-semibold text-white">Your Preferences</h3>
+                  <div className="w-8 h-8 border-2 border-green-700 rounded-full flex items-center justify-center text-green-700 font-bold shadow-lg bg-white/90">2</div>
+                  <h3 className="text-xl font-semibold text-slate-900">Your Preferences</h3>
                 </div>
-                <div className="grid grid-cols-1 gap-6 bg-black/5 p-6 rounded-lg">
+                <div className="grid grid-cols-1 gap-6 bg-green-50/70 p-6 rounded-xl border border-green-200">
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-white block text-center">Cooking Time</label>
+                    <label className="text-sm font-medium text-slate-700 block text-center">Cooking Time</label>
                     <CookingTimeSelector
                       selectedCookingTime={cookingTime}
                       onCookingTimeChange={setCookingTime}
@@ -409,12 +419,12 @@ const Index = () => {
               {/* Section 3: Kitchen Equipment */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-kitchen-orange rounded-full flex items-center justify-center text-white font-bold">3</div>
-                  <h3 className="text-xl font-semibold text-white">Kitchen Equipment</h3>
+                  <div className="w-8 h-8 border-2 border-green-700 rounded-full flex items-center justify-center text-green-700 font-bold shadow-lg bg-white/90">3</div>
+                  <h3 className="text-xl font-semibold text-slate-900">Kitchen Equipment</h3>
                 </div>
-                <div className="bg-black/5 p-6 rounded-lg">
+                <div className="bg-green-50/70 p-6 rounded-xl border border-green-200">
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-white block text-center">Available Equipment</label>
+                    <label className="text-sm font-medium text-slate-700 block text-center">Available Equipment</label>
                     <KitchenEquipmentSelector
                       selectedEquipment={selectedEquipment}
                       onEquipmentChange={setSelectedEquipment}
@@ -424,11 +434,11 @@ const Index = () => {
               </div>
               
               {/* Generate Button */}
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center pt-6">
                 <Button 
                   onClick={handleGenerateRecipes}
                   disabled={isGeneratingRecipes}
-                  className="bg-gradient-to-r from-kitchen-orange to-kitchen-orange/90 hover:from-kitchen-orange/90 hover:to-kitchen-orange text-white font-bold py-4 px-8 text-lg rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 ease-in-out focus:ring-4 focus:ring-kitchen-orange/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-w-[280px]"
+                  className="bg-green-700 hover:bg-green-800 active:bg-green-800 text-white font-semibold py-4 px-10 text-lg rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 ease-out focus:ring-4 focus:ring-green-700/30 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-w-[280px]"
                 >
                   {isGeneratingRecipes ? (
                     <>
@@ -461,7 +471,7 @@ const Index = () => {
           <div className="flex gap-2">
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-kitchen-green hover:bg-kitchen-green/90">
+                <Button className="bg-green-700 hover:bg-green-800 active:bg-green-800 text-white shadow-lg">
                   <Plus className="mr-2 h-4 w-4" /> Add Ingredient
                 </Button>
               </DialogTrigger>
@@ -561,17 +571,17 @@ const Index = () => {
                 </div>
                 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmittingIngredient}>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmittingIngredient} className="border-gray-400 bg-white text-gray-700 hover:bg-gray-400 hover:text-white active:bg-gray-400 active:text-white">
                     Cancel
                   </Button>
-                  <Button onClick={handleAddIngredient} disabled={isSubmittingIngredient}>
+                  <Button onClick={handleAddIngredient} disabled={isSubmittingIngredient} className="bg-green-700 hover:bg-green-800 active:bg-green-800 text-white">
                     {isSubmittingIngredient ? "Adding..." : "Add to Inventory"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
             
-            <Button variant="outline" onClick={handleScanReceipt}>
+            <Button variant="outline" onClick={handleScanReceipt} className="border-green-700 bg-white text-green-700 hover:bg-green-700 hover:text-white active:bg-green-700 active:text-white shadow-lg">
               <Upload className="mr-2 h-4 w-4" /> Scan Receipt
             </Button>
           </div>
@@ -689,21 +699,21 @@ const Index = () => {
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4">Ingredient Tips</h2>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-muted rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Storage Tips</h3>
-              <p className="text-sm text-muted-foreground">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-green-200 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold mb-2 text-green-700">Storage Tips</h3>
+              <p className="text-sm text-slate-600">
                 Store leafy greens with a paper towel to absorb moisture and keep them fresh longer.
               </p>
             </div>
-            <div className="bg-muted rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Expiry Alerts</h3>
-              <p className="text-sm text-muted-foreground">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-green-200 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold mb-2 text-green-700">Expiry Alerts</h3>
+              <p className="text-sm text-slate-600">
                 Receive notifications when your ingredients are about to expire to reduce food waste.
               </p>
             </div>
-            <div className="bg-muted rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Recipe Generation</h3>
-              <p className="text-sm text-muted-foreground">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-green-200 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold mb-2 text-green-700">Recipe Generation</h3>
+              <p className="text-sm text-slate-600">
                 Check ingredients above to automatically add them to your recipe generation form.
               </p>
             </div>
@@ -713,7 +723,7 @@ const Index = () => {
       )}
       
       {/* AI Features Section */}
-      <section className="py-12 bg-kitchen-light">
+      <section className="py-16 bg-gradient-to-br from-green-50 to-green-100">
         <div className="kitchen-container">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
@@ -730,7 +740,7 @@ const Index = () => {
                   "Manage your kitchen inventory and reduce waste"
                 ].map((feature, index) => (
                   <li key={index} className="flex items-start">
-                    <div className="mr-3 mt-1 h-5 w-5 flex items-center justify-center rounded-full bg-kitchen-green text-white">
+                    <div className="mr-3 mt-1 h-5 w-5 flex items-center justify-center rounded-full bg-green-700 text-white">
                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -740,7 +750,7 @@ const Index = () => {
                 ))}
               </ul>
               <div className="mt-8">
-                <Button asChild className="bg-kitchen-green hover:bg-kitchen-green/90">
+                <Button asChild className="bg-green-700 hover:bg-green-800 active:bg-green-800 text-white shadow-lg">
                   <Link to="/recipes">View Recipe History</Link>
                 </Button>
               </div>
@@ -754,7 +764,7 @@ const Index = () => {
               <div className="absolute -bottom-5 -left-5 bg-white p-4 rounded-lg shadow-lg">
                 <div className="text-sm font-semibold mb-1">AI Recipe Generation</div>
                 <div className="text-xs text-muted-foreground">Based on your ingredients</div>
-                <div className="mt-2 text-kitchen-green font-medium">Chicken & Rice Stir-fry</div>
+                <div className="mt-2 text-green-700 font-medium">Chicken & Rice Stir-fry</div>
               </div>
             </div>
           </div>

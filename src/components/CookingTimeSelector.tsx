@@ -12,19 +12,20 @@ const cookingTimes = [
 ];
 
 const CookingTimeSelector = ({ selectedCookingTime, onCookingTimeChange }: CookingTimeSelectorProps) => {
-  // Shared button styles to match MealTypeSelector
+  // Shared button styles to match MealTypeSelector - forcing refresh
   const getButtonClassName = (isSelected: boolean, color: string) => 
     `flex flex-col h-16 w-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
       isSelected 
-        ? `bg-gradient-to-br ${color} text-white shadow-lg ring-2 ring-white/50` 
-        : 'bg-white/90 hover:bg-white text-kitchen-dark border border-white/50 hover:shadow-md'
-    }`;
+        ? `border-2 shadow-lg` 
+        : 'bg-gray-200 border-2 border-gray-300 hover:shadow-md hover:bg-gray-200'
+    }`
+    + (isSelected ? ' hover:bg-[#E35336]/10' : '');
 
   const getIconClassName = (isSelected: boolean) => 
-    `h-4 w-4 mb-1 ${isSelected ? 'text-white' : 'text-kitchen-dark'}`;
+    `h-4 w-4 mb-1 ${isSelected ? 'text-[#E35336]' : 'text-gray-500'}`;
 
   const getTextClassName = (isSelected: boolean) => 
-    `text-xs font-medium leading-tight text-center ${isSelected ? 'text-white' : 'text-kitchen-dark'}`;
+    `text-xs font-medium leading-tight text-center ${isSelected ? 'text-[#E35336]' : 'text-gray-500'}`;
 
   const getSubtitleClassName = (isSelected: boolean) => 
     `text-xs opacity-80 leading-tight text-center ${isSelected ? 'text-white/90' : 'text-kitchen-dark/70'}`;
@@ -39,6 +40,10 @@ const CookingTimeSelector = ({ selectedCookingTime, onCookingTimeChange }: Cooki
             variant="ghost"
             onClick={() => onCookingTimeChange(timeOption.id)}
             className={getButtonClassName(isSelected, timeOption.color)}
+            style={isSelected ? {
+              backgroundColor: '#E35336' + '1A', // 10% opacity
+              borderColor: '#E35336'
+            } : {}}
           >
             <timeOption.icon className={getIconClassName(isSelected)} />
             <span className={getTextClassName(isSelected)}>

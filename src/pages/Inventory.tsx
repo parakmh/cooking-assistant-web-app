@@ -29,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Plus, Search, Upload, Loader2 } from "lucide-react"; // Added Loader2
 import IngredientItem from "@/components/IngredientItem";
+import ReceiptScanModal from "@/components/ReceiptScanModal";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { apiGet, apiPost, apiDelete, apiPut, InventoryItemData } from "@/lib/api";
@@ -63,6 +64,7 @@ const Inventory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isReceiptScanOpen, setIsReceiptScanOpen] = useState(false);
   const [expiringOnly, setExpiringOnly] = useState(false);
   
   // New ingredient form state
@@ -238,9 +240,14 @@ const Inventory = () => {
   };
   
   const handleScanReceipt = () => {
+    setIsReceiptScanOpen(true);
+  };
+
+  const handleReceiptItemsAdded = (newItems: InventoryItemData[]) => {
+    setInventory(prevInventory => [...prevInventory, ...newItems]);
     toast({
-      title: "Receipt scanning",
-      description: "This feature is not yet implemented."
+      title: "Items added from receipt",
+      description: `Successfully added ${newItems.length} items to your inventory.`,
     });
   };
 
@@ -529,6 +536,12 @@ const Inventory = () => {
             </DialogContent>
         </Dialog>
       )}
+
+      <ReceiptScanModal
+        isOpen={isReceiptScanOpen}
+        onClose={() => setIsReceiptScanOpen(false)}
+        onItemsAdded={handleReceiptItemsAdded}
+      />
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">Ingredient Tips</h2>

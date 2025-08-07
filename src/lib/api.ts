@@ -213,3 +213,39 @@ export interface RecipeSuggestionsResponse {
   message?: string; // Optional message from backend
   userId?: string;  // Optional userId if backend includes it
 }
+
+// Receipt scanning interfaces
+export interface ReceiptItem {
+  name: string;
+  quantity: number | string;
+  unit: string;
+  category?: string;
+}
+
+export interface ReceiptScanResponse {
+  detected_items: ReceiptItem[];
+  confidence: 'high' | 'medium' | 'low';
+  notes?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface BulkAddResponse {
+  created_items: InventoryItemData[];
+  success_count: number;
+  total_count: number;
+  errors?: string[];
+  message: string;
+}
+
+// Receipt scanning API functions
+export const scanReceipt = async (imageFile: File): Promise<ReceiptScanResponse> => {
+  const formData = new FormData();
+  formData.append('image', imageFile);
+  
+  return apiPost<ReceiptScanResponse>('/inventory/scan-receipt', formData, true, true);
+};
+
+export const bulkAddInventoryItems = async (items: ReceiptItem[]): Promise<BulkAddResponse> => {
+  return apiPost<BulkAddResponse>('/inventory/bulk-add', { items });
+};

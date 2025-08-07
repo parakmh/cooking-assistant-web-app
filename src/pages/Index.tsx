@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"; // Popover components
+import ReceiptScanModal from "@/components/ReceiptScanModal";
 import { Label } from "@/components/ui/label"; // Label component
 import {
   Dialog,
@@ -85,6 +86,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isReceiptScanOpen, setIsReceiptScanOpen] = useState(false);
   const [expiringOnly, setExpiringOnly] = useState(false);
   
   // Recipe generation form state
@@ -332,9 +334,14 @@ const Index = () => {
   };
   
   const handleScanReceipt = () => {
+    setIsReceiptScanOpen(true);
+  };
+
+  const handleReceiptItemsAdded = (newItems: InventoryItemData[]) => {
+    setInventory(prevInventory => [...prevInventory, ...newItems]);
     toast({
-      title: "Receipt scanning",
-      description: "This feature would scan your receipt to add items automatically"
+      title: "Items added from receipt",
+      description: `Successfully added ${newItems.length} items to your inventory.`,
     });
   };
   
@@ -837,6 +844,12 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ReceiptScanModal
+        isOpen={isReceiptScanOpen}
+        onClose={() => setIsReceiptScanOpen(false)}
+        onItemsAdded={handleReceiptItemsAdded}
+      />
     </div>
   );
 };

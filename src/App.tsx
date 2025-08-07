@@ -15,6 +15,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RecipeResults from "./pages/RecipeResults";
 import RecipeDetailsPage from "./pages/RecipeDetailsPage";
+import Inventory from "./pages/Inventory";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/inventory" element={<Inventory />} />
                   {/* Add other protected routes here, e.g., inventory management */}
                 </Route>
                 

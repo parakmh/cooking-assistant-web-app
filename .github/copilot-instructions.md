@@ -1,5 +1,7 @@
 # KitchenAI Assistant - Frontend Development Guide
 
+**AI Instructions**: Keep responses concise. Don't create verbose .md files. Important docs go in `doc/` folder only.
+
 ## Project Context
 
 This is the **React/TypeScript frontend** for KitchenAI Assistant, a cooking assistant web application that helps users manage kitchen inventory, discover recipes, and get AI-powered cooking recommendations.

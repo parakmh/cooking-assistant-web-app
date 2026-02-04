@@ -23,13 +23,13 @@ const LoginPage: React.FC = () => {
     setError(null);
     try {
       // simplejwt returns { access: string, refresh: string }
-      const response = await apiPost<{ access: string }>(
+      const response = await apiPost<{ access: string; refresh: string }>(
         '/auth/login',
         { email, password },
         false
       );
-      // Store access token in auth context
-      loginWithToken(response.access); // Use loginWithToken to set token and update auth state
+      // Store both access and refresh tokens
+      loginWithToken(response.access, response.refresh);
       // Navigation is now handled by the useEffect above
     } catch (err: any) {
       setError(err.data?.message || 'Login failed. Please check your credentials.');

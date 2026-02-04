@@ -1,7 +1,8 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import RecipeCard from '@/components/RecipeCard'; // Import RecipeCard
+import RecipeCard from '@/components/RecipeCard';
 import { RecipeSuggestion, getBackendDomain } from '@/lib/api';
+import { sanitizeRecipe } from '@/lib/sanitize'; // Import sanitize function
 import { getRecipeImageUrl } from '@/lib/recipeImages';
 import {
   Dialog,
@@ -51,16 +52,14 @@ const RecipeResults = () => {
 
   // Ensure results and suggestedForYou are properly destructured and have defaults
   const { queryParams, results } = location.state || { queryParams: {}, results: { results: [], suggestedForYou: [] } };
-  const suggestions: RecipeSuggestion[] = results.suggestedForYou || [];
-  const recipesFromSearch: RecipeSuggestion[] = results.results || []; // Changed from results.recipes to results.results and added type
-
-  // Log queryParams to the console
-  useEffect(() => {
-    console.log("Query Sent to Backend:", queryParams);
-  }, [queryParams]);
+  
+  // SECURITY: Sanitize all recipes from location state to prevent XSS
+  const suggestions: RecipeSuggestion[] = (results.suggestedForYou || []).map(sanitizeRecipe);
+  const recipesFromSearch: RecipeSuggestion[] = (results.results || []).map(sanitizeRecipe);
 
   const handleViewRecipe = (recipe: RecipeSuggestion) => {
-    setSelectedRecipe(recipe);
+    // Sanitize before setting (defense in depth)
+    setSelectedRecipe(sanitizeRecipe(recipe));
     setIsModalOpen(true);
   };
 

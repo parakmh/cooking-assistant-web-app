@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet, RecipeSuggestion } from '@/lib/api';
+import { getSafeRecipe, RecipeSuggestion } from '@/lib/api';
 import { getRecipeImageUrl } from '@/lib/recipeImages';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ const RecipeDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: recipe, isLoading, error } = useQuery<RecipeSuggestion, Error>({
     queryKey: ['recipe', id],
-    queryFn: () => apiGet<RecipeSuggestion>(`/recipes/${id}`),
+    queryFn: () => getSafeRecipe(id!), // Using safe wrapper
   });
 
   if (isLoading) return <div className="kitchen-container py-8">Loading recipe details...</div>;

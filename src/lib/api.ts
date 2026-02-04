@@ -7,6 +7,12 @@ const getApiBaseUrl = () => {
   return baseUrl;
 };
 
+import { 
+  sanitizeRecipe, 
+  sanitizeInventoryItem, 
+  sanitizeUserProfile 
+} from './sanitize';
+
 export const getToken = (): string | null => {
   return localStorage.getItem('authToken');
 };
@@ -15,8 +21,17 @@ export const setToken = (token: string): void => {
   localStorage.setItem('authToken', token);
 };
 
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem('refreshToken');
+};
+
+export const setRefreshToken = (token: string): void => {
+  localStorage.setItem('refreshToken', token);
+};
+
 export const removeToken = (): void => {
   localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
 };
 
 // Token validation utility
@@ -31,21 +46,108 @@ export const isTokenExpired = (token: string): boolean => {
   }
 };
 
-// Enhanced token getter that checks expiration
-export const getValidToken = (): string | null => {
+// Check if token will expire soon (within 5 minutes)
+export const willTokenExpireSoon = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    const fiveMinutes = 5 * 60;
+    return payload.exp < (currentTime + fiveMinutes);
+  } catch (error) {
+    return true;
+  }
+};
+
+// Refresh token utility
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+const onRefreshed = (token: string) => {
+  refreshSubscribers.forEach(callback => callback(token));
+  refreshSubscribers = [];
+};
+
+const addRefreshSubscriber = (callback: (token: string) => void) => {
+  refreshSubscribers.push(callback);
+};
+
+export const refreshAccessToken = async (): Promise<string | null> => {
+  const refreshToken = getRefreshToken();
+  
+  if (!refreshToken) {
+    console.warn('No refresh token available');
+    return null;
+  }
+
+  if (isRefreshing) {
+    // Wait for the ongoing refresh to complete
+    return new Promise((resolve) => {
+      addRefreshSubscriber((token: string) => {
+        resolve(token);
+      });
+    });
+  }
+
+  isRefreshing = true;
+
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Token refresh failed');
+    }
+
+    const data = await response.json();
+    const newAccessToken = data.access;
+    
+    setToken(newAccessToken);
+    isRefreshing = false;
+    onRefreshed(newAccessToken);
+    
+    return newAccessToken;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    isRefreshing = false;
+    removeToken();
+    window.dispatchEvent(new CustomEvent('auth:logout', { 
+      detail: { reason: 'refresh_failed' } 
+    }));
+    return null;
+  }
+};
+
+// Enhanced token getter that checks expiration and auto-refreshes
+export const getValidToken = async (): Promise<string | null> => {
   const token = getToken();
   if (!token) return null;
   
   if (isTokenExpired(token)) {
-    console.warn('Token expired, removing from storage');
-    removeToken();
-    // Trigger global logout
-    window.dispatchEvent(new CustomEvent('auth:logout', { 
-      detail: { reason: 'token_expired_on_check' } 
-    }));
-    return null;
+    console.warn('Token expired, attempting refresh');
+    return await refreshAccessToken();
   }
   
+  // Auto-refresh if token expires soon
+  if (willTokenExpireSoon(token)) {
+    console.log('Token expiring soon, refreshing proactively');
+    const newToken = await refreshAccessToken();
+    return newToken || token; // Return new token or keep using current if refresh fails
+  }
+  
+  return token;
+};
+
+// Synchronous version for immediate checks (doesn't auto-refresh)
+export const getValidTokenSync = (): string | null => {
+  const token = getToken();
+  if (!token || isTokenExpired(token)) {
+    return null;
+  }
   return token;
 };
 
@@ -67,7 +169,7 @@ export const apiCall = async <T = any>(
   headers.append('Accept', 'application/json');
 
   if (needsAuth) {
-    const token = getValidToken(); // Use enhanced token getter
+    const token = await getValidToken(); // Use enhanced token getter with auto-refresh
     if (token) {
       headers.append('Authorization', `Bearer ${token}`);
     } else {
@@ -248,4 +350,85 @@ export const scanReceipt = async (imageFile: File): Promise<ReceiptScanResponse>
 
 export const bulkAddInventoryItems = async (items: ReceiptItem[]): Promise<BulkAddResponse> => {
   return apiPost<BulkAddResponse>('/inventory/bulk-add', { items });
+};
+
+/**
+ * SANITIZED API WRAPPERS
+ * These functions automatically sanitize responses to prevent XSS attacks
+ */
+
+/**
+ * Fetch and sanitize a single recipe
+ */
+export const getSafeRecipe = async (recipeId: string): Promise<RecipeSuggestion> => {
+  const recipe = await apiGet<RecipeSuggestion>(`/recipes/${recipeId}`);
+  return sanitizeRecipe(recipe);
+};
+
+/**
+ * Fetch and sanitize recipe search results
+ */
+export const getSafeRecipes = async (queryString: string): Promise<any> => {
+  const response = await apiGet<any>(`/recipes?${queryString}`);
+  
+  // Sanitize all recipes in the response
+  if (response.results && Array.isArray(response.results)) {
+    response.results = response.results.map(sanitizeRecipe);
+  }
+  
+  if (response.suggestedForYou && Array.isArray(response.suggestedForYou)) {
+    response.suggestedForYou = response.suggestedForYou.map(sanitizeRecipe);
+  }
+  
+  return response;
+};
+
+/**
+ * Fetch and sanitize user profile
+ */
+export const getSafeUserProfile = async (): Promise<UserData> => {
+  const userData = await apiGet<UserData>('/auth/me');
+  
+  if (userData.profile) {
+    userData.profile = sanitizeUserProfile(userData.profile);
+  }
+  
+  // Sanitize username and email (although these should be safe from backend)
+  if (userData.username) {
+    userData.username = sanitizeUserProfile({ username: userData.username }).username;
+  }
+  
+  return userData;
+};
+
+/**
+ * Fetch and sanitize inventory items
+ */
+export const getSafeInventory = async (): Promise<{ items: InventoryItemData[] }> => {
+  const response = await apiGet<{ items: InventoryItemData[] }>('/inventory');
+  
+  if (response.items && Array.isArray(response.items)) {
+    response.items = response.items.map(sanitizeInventoryItem);
+  }
+  
+  return response;
+};
+
+/**
+ * Add inventory item and sanitize response
+ */
+export const addSafeInventoryItem = async (item: Partial<InventoryItemData>): Promise<InventoryItemData> => {
+  const addedItem = await apiPost<InventoryItemData>('/inventory', item);
+  return sanitizeInventoryItem(addedItem);
+};
+
+/**
+ * Update inventory item and sanitize response
+ */
+export const updateSafeInventoryItem = async (
+  id: string, 
+  item: Partial<InventoryItemData>
+): Promise<InventoryItemData> => {
+  const updatedItem = await apiPut<InventoryItemData>(`/inventory/${id}`, item);
+  return sanitizeInventoryItem(updatedItem);
 };

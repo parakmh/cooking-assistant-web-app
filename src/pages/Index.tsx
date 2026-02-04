@@ -9,10 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apiGet, apiPost, apiDelete, InventoryItemData, UserData } from "@/lib/api";
-import { useToast } from "@/components/ui/use-toast"; // Ensure useToast is imported
-import { format } from "date-fns"; // For formatting date
-import { cn } from "@/lib/utils"; // For conditional classes
+import { 
+  apiGet, 
+  apiPost, 
+  apiDelete, 
+  getSafeInventory,
+  addSafeInventoryItem,
+  getSafeRecipes,
+  InventoryItemData, 
+  UserData 
+} from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar"; // Calendar component
 import {
   Popover,
@@ -119,7 +128,8 @@ const Index = () => {
     const fetchInventory = async () => {
       setIsLoadingInventory(true);
       try {
-        const data = await apiGet<{items: InventoryItemData[]}>("/inventory");
+        // SECURITY: Using safe wrapper that sanitizes inventory items
+        const data = await getSafeInventory();
         setInventory(data.items || []);
       } catch (error: any) {
         console.error("Failed to fetch inventory for landing page:", error);
@@ -146,11 +156,9 @@ const Index = () => {
     const fetchUserProfile = async () => {
       try {
         const userData = await apiGet<any>("/auth/me");
-        console.log("User profile data:", userData); // Debug log
         
         // Handle both camelCase and snake_case from backend
         const dietaryPrefs = userData.profile?.dietaryPreferences || userData.profile?.dietary_preferences || [];
-        console.log("Dietary preferences found:", dietaryPrefs); // Debug log
         
         if (dietaryPrefs.length > 0) {
           setSelectedDietaryPreferences(dietaryPrefs);
@@ -233,7 +241,8 @@ const Index = () => {
     };
     
     try {
-      const addedItem = await apiPost<InventoryItemData>("/inventory", payload);
+      // SECURITY: Using safe wrapper that sanitizes the returned item
+      const addedItem = await addSafeInventoryItem(payload);
       setInventory(prevInventory => [...prevInventory, addedItem]);
       setIsAddDialogOpen(false);
       setNewIngredient({
@@ -302,8 +311,8 @@ const Index = () => {
     ).toString();
     
     try {
-      // Call GET /api/recipes endpoint
-      const response = await apiGet<any>(`/recipes?${queryString}`); 
+      // SECURITY: Using safe wrapper that sanitizes all recipe data
+      const response = await getSafeRecipes(queryString); 
       
       toast({
         title: "Recipe Search Complete",

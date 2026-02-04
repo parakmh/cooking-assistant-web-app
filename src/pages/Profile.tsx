@@ -26,10 +26,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, Settings, Edit3, Loader2, Bell } from "lucide-react"; // Added Bell
-import { Switch } from "@/components/ui/switch"; // Added Switch
+import { User, Settings, Edit3, Loader2, Bell } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { apiGet, apiPut, UserData, UserProfileData } from "@/lib/api";
+import { getSafeUserProfile, apiPut, UserData, UserProfileData } from "@/lib/api";
+import { sanitizeUserProfile } from "@/lib/sanitize";
 
 // Define available options for multi-select fields
 const ALL_DIETARY_PREFERENCES = [
@@ -74,7 +75,8 @@ const Profile = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await apiGet<UserData>("/auth/me");
+        // SECURITY: Using safe wrapper that sanitizes user profile data
+        const data = await getSafeUserProfile();
         setUserData(data);
         // Initialize profileData from GET /auth/me (keys already camelCase)
         const profileFromBackend = data.profile || {};
@@ -145,17 +147,21 @@ const Profile = () => {
       };
       // Save preferences and map response back to camelCase
       const resp = await apiPut<any>("/users/profile", snakePayload);
+      
+      // SECURITY: Sanitize the response from backend
+      const sanitizedResp = sanitizeUserProfile(resp);
+      
       setProfileData({
-        dietaryPreferences: resp.dietary_preferences || [],
-        allergies: resp.allergies || [],
-        cookingExpertise: resp.cooking_expertise || "Beginner",
-        cuisinePreferences: resp.cuisine_preferences || [],
-        bio: resp.bio || "",
-        profilePicture: resp.profile_picture || "",
-        kitchenEquipment: resp.kitchen_equipment || [],
-        notifyExpiringIngredients: resp.notify_expiring_ingredients ?? true,
-        notifyWeeklyMealPlan: resp.notify_weekly_meal_plan ?? true,
-        notifyNewRecipes: resp.notify_new_recipes ?? false,
+        dietaryPreferences: sanitizedResp.dietary_preferences || [],
+        allergies: sanitizedResp.allergies || [],
+        cookingExpertise: sanitizedResp.cooking_expertise || "Beginner",
+        cuisinePreferences: sanitizedResp.cuisine_preferences || [],
+        bio: sanitizedResp.bio || "",
+        profilePicture: sanitizedResp.profile_picture || "",
+        kitchenEquipment: sanitizedResp.kitchen_equipment || [],
+        notifyExpiringIngredients: sanitizedResp.notify_expiring_ingredients ?? true,
+        notifyWeeklyMealPlan: sanitizedResp.notify_weekly_meal_plan ?? true,
+        notifyNewRecipes: sanitizedResp.notify_new_recipes ?? false,
         notifyCookingTips: resp.notify_cooking_tips ?? true,
         mealPlanFrequency: resp.meal_plan_frequency || "weekly",
       });

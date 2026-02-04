@@ -27,12 +27,18 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, Search, Upload, Loader2 } from "lucide-react"; // Added Loader2
+import { Calendar as CalendarIcon, Plus, Search, Upload, Loader2 } from "lucide-react";
 import IngredientItem from "@/components/IngredientItem";
 import ReceiptScanModal from "@/components/ReceiptScanModal";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { apiGet, apiPost, apiDelete, apiPut, InventoryItemData } from "@/lib/api";
+import { 
+  apiDelete, 
+  getSafeInventory,
+  addSafeInventoryItem,
+  updateSafeInventoryItem,
+  InventoryItemData 
+} from "@/lib/api";
 
 // Local interface for form state management
 interface InventoryFormItem {
@@ -85,7 +91,8 @@ const Inventory = () => {
     const fetchInventory = async () => {
       setIsLoading(true);
       try {
-        const data = await apiGet<{items: InventoryItemData[]}>("/inventory");
+        // SECURITY: Using safe wrapper that sanitizes inventory items
+        const data = await getSafeInventory();
         setInventory(data.items || []);
       } catch (error: any) {
         console.error("Failed to fetch inventory:", error);
@@ -114,7 +121,6 @@ const Inventory = () => {
   });
   
   const handleRemoveIngredient = async (id: string) => {
-    console.log(`Attempting to remove ingredient with ID: ${id}`); // Added log
     try {
       await apiDelete(`/inventory/${id}`);
       setInventory(prevInventory => prevInventory.filter(item => item.id !== id));
@@ -158,7 +164,8 @@ const Inventory = () => {
 
     setIsSubmitting(true);
     try {
-      const addedItem = await apiPost<InventoryItemData>("/inventory", payload);
+      // SECURITY: Using safe wrapper that sanitizes the returned item
+      const addedItem = await addSafeInventoryItem(payload);
       // The backend might not return 'category', so we add it client-side if needed for display
       // or ensure InventoryItemData from api.ts matches backend strictly.
       // For now, assuming addedItem matches InventoryItemData.
@@ -215,7 +222,8 @@ const Inventory = () => {
     
     setIsSubmitting(true);
     try {
-      const updatedItem = await apiPut<InventoryItemData>(`/inventory/${editingItem.id}`, payload);
+      // SECURITY: Using safe wrapper that sanitizes the returned item
+      const updatedItem = await updateSafeInventoryItem(editingItem.id!, payload);
       setInventory(prevInventory => 
         prevInventory.map(invItem => 
           invItem.id === updatedItem.id ? updatedItem : invItem

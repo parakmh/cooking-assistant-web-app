@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, X, Edit3, Plus } from "lucide-react";
 import { scanReceipt, bulkAddInventoryItems, ReceiptItem, InventoryItemData } from "@/lib/api";
+import { sanitizeInventoryItem, sanitizeText } from "@/lib/sanitize";
 
 interface ReceiptScanModalProps {
   isOpen: boolean;
@@ -113,8 +114,16 @@ const ReceiptScanModal = ({ isOpen, onClose, onItemsAdded }: ReceiptScanModalPro
         return;
       }
 
-      setDetectedItems(result.detected_items);
-      setEditingItems([...result.detected_items]);
+      // SECURITY: Sanitize all detected items from OCR service
+      const sanitizedItems = result.detected_items.map(item => ({
+        name: sanitizeText(item.name),
+        quantity: item.quantity,
+        unit: sanitizeText(String(item.unit)),
+        category: item.category ? sanitizeText(item.category) : undefined,
+      }));
+
+      setDetectedItems(sanitizedItems);
+      setEditingItems([...sanitizedItems]);
       setStep('review');
       
       toast({
@@ -182,6 +191,9 @@ const ReceiptScanModal = ({ isOpen, onClose, onItemsAdded }: ReceiptScanModalPro
     try {
       const result = await bulkAddInventoryItems(validItems);
       
+      // SECURITY: Sanitize all created items before passing to parent
+      const sanitizedCreatedItems = result.created_items.map(sanitizeInventoryItem);
+      
       toast({
         title: "Items added successfully",
         description: result.message,
@@ -191,7 +203,7 @@ const ReceiptScanModal = ({ isOpen, onClose, onItemsAdded }: ReceiptScanModalPro
         console.warn("Some items had errors:", result.errors);
       }
 
-      onItemsAdded(result.created_items);
+      onItemsAdded(sanitizedCreatedItems);
       handleClose();
 
     } catch (error: any) {

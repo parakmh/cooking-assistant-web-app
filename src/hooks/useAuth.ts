@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getToken, getValidToken, removeToken, setToken as storeToken } from '../lib/api';
+import { getToken, getValidTokenSync, removeToken, setToken as storeToken, setRefreshToken } from '../lib/api';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -15,13 +15,22 @@ export const useAuth = () => {
   });
 
   useEffect(() => {
-    // Use getValidToken which checks expiration and automatically cleans up expired tokens
-    const token = getValidToken();
+    // Use synchronous check on mount (async refresh happens in API calls)
+    const token = getValidTokenSync();
     if (token) {
       setAuthState({ isAuthenticated: true, isLoading: false });
     } else {
       setAuthState({ isAuthenticated: false, isLoading: false });
     }
+
+    // Set up periodic token refresh check (every 2 minutes)
+    const refreshInterval = setInterval(async () => {
+      const currentToken = getToken();
+      if (currentToken) {
+        const { getValidToken } = await import('../lib/api');
+        await getValidToken(); // This will auto-refresh if needed
+      }
+    }, 2 * 60 * 1000); // 2 minutes
 
     // Listen for global logout events (e.g., from expired tokens in API calls)
     const handleGlobalLogout = (event: CustomEvent) => {
@@ -37,6 +46,7 @@ export const useAuth = () => {
     window.addEventListener('auth:logout', handleGlobalLogout as EventListener);
     
     return () => {
+      clearInterval(refreshInterval);
       window.removeEventListener('auth:logout', handleGlobalLogout as EventListener);
     };
   }, []);
@@ -54,8 +64,11 @@ export const useAuth = () => {
   }, []);
   
   // This can be used if login itself returns the token
-  const loginWithToken = useCallback((token: string) => {
-    storeToken(token);
+  const loginWithToken = useCallback((accessToken: string, refreshToken?: string) => {
+    storeToken(accessToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
     setAuthState({ isAuthenticated: true, isLoading: false });
   }, []);
 

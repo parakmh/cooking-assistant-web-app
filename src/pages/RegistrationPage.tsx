@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiPost } from '../lib/api';
+import { getErrorMessage, getFieldErrors } from '../lib/errors';
 
 const RegistrationPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -32,7 +33,16 @@ const RegistrationPage: React.FC = () => {
       // Optionally redirect to login or show a message
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
-      setError(err.data?.message || 'Registration failed. Please try again.');
+      const fieldErrors = getFieldErrors(err);
+      if (Object.keys(fieldErrors).length > 0) {
+        // Show field-specific errors
+        const errorMessages = Object.entries(fieldErrors)
+          .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+          .join('\n');
+        setError(errorMessages);
+      } else {
+        setError(getErrorMessage(err));
+      }
       console.error('Registration error:', err);
     }
   };

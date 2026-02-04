@@ -31,6 +31,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { getSafeUserProfile, apiPut, UserData, UserProfileData } from "@/lib/api";
 import { sanitizeUserProfile } from "@/lib/sanitize";
+import { getErrorMessage } from "@/lib/errors";
 
 // Define available options for multi-select fields
 const ALL_DIETARY_PREFERENCES = [
@@ -96,10 +97,11 @@ const Profile = () => {
         });
       } catch (err: any) {
         console.error("Failed to fetch user data:", err);
-        setError(err.data?.message || "Failed to load profile. Please try again.");
+        const errorMsg = getErrorMessage(err);
+        setError(errorMsg);
         toast({
           title: "Error",
-          description: err.data?.message || "Could not load your profile.",
+          description: errorMsg,
           variant: "destructive",
         });
       } finally {
@@ -171,10 +173,11 @@ const Profile = () => {
       });
     } catch (err: any) {
       console.error("Failed to save preferences:", err);
-      setError(err.data?.message || "Failed to save preferences.");
+      const errorMsg = getErrorMessage(err);
+      setError(errorMsg);
       toast({
         title: "Error Saving Preferences",
-        description: err.data?.message || "Could not save your preferences.",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
@@ -225,10 +228,11 @@ const Profile = () => {
       });
     } catch (err: any) {
       console.error("Failed to save account info:", err);
-      setError(err.data?.message || "Failed to save account info.");
+      const errorMsg = getErrorMessage(err);
+      setError(errorMsg);
       toast({
         title: "Error Saving Account Info",
-        description: err.data?.message || "Could not save account information.",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
@@ -277,10 +281,11 @@ const Profile = () => {
       });
     } catch (err: any) {
       console.error("Failed to save notification settings:", err);
-      setError(err.data?.message || "Failed to save notification settings.");
+      const errorMsg = getErrorMessage(err);
+      setError(errorMsg);
       toast({
         title: "Error Saving Notification Settings",
-        description: err.data?.message || "Could not save your notification settings.",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {

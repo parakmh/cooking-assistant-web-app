@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
-import { useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
-import { apiPost } from '../lib/api'; // setToken is no longer needed here directly
-import { useAuth } from '../contexts/AuthContext'; // Corrected import path
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { apiPost } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
+import { getErrorMessage } from '../lib/errors';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +33,7 @@ const LoginPage: React.FC = () => {
       loginWithToken(response.access, response.refresh);
       // Navigation is now handled by the useEffect above
     } catch (err: any) {
-      setError(err.data?.message || 'Login failed. Please check your credentials.');
+      setError(getErrorMessage(err));
       console.error('Login error:', err);
     }
   };

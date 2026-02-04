@@ -32,6 +32,7 @@ import IngredientItem from "@/components/IngredientItem";
 import ReceiptScanModal from "@/components/ReceiptScanModal";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { getErrorMessage } from "@/lib/errors";
 import { 
   apiDelete, 
   getSafeInventory,
@@ -98,7 +99,7 @@ const Inventory = () => {
         console.error("Failed to fetch inventory:", error);
         toast({
           title: "Error fetching inventory",
-          description: error.data?.message || "Could not load your inventory.",
+          description: getErrorMessage(error),
           variant: "destructive",
         });
       } finally {
@@ -132,7 +133,7 @@ const Inventory = () => {
       console.error("Failed to remove ingredient:", error);
       toast({
         title: "Error removing ingredient",
-        description: error.data?.message || "Could not remove the item.",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
@@ -180,7 +181,7 @@ const Inventory = () => {
       console.error("Failed to add ingredient:", error);
       toast({
         title: "Error adding ingredient",
-        description: error.data?.message || "Could not add the item.",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -239,7 +240,7 @@ const Inventory = () => {
       console.error("Failed to update ingredient:", error);
       toast({
         title: "Error updating ingredient",
-        description: error.data?.message || "Could not update the item.",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {

@@ -12,6 +12,7 @@ import {
   sanitizeInventoryItem, 
   sanitizeUserProfile 
 } from './sanitize';
+import { ApiError, ApiErrorResponse } from './errors';
 
 export const getToken = (): string | null => {
   return localStorage.getItem('authToken');
@@ -190,11 +191,11 @@ export const apiCall = async <T = any>(
   });
 
   if (!response.ok) {
-    let errorData;
+    let errorData: ApiErrorResponse;
     try {
       errorData = await response.json();
     } catch (e) {
-      errorData = { message: response.statusText };
+      errorData = { error: response.statusText || 'Request failed' };
     }
     
     // Handle 401 Unauthorized - token expired or invalid
@@ -207,8 +208,13 @@ export const apiCall = async <T = any>(
       }));
     }
     
-    console.error('API Error:', response.status, errorData);
-    throw { status: response.status, data: errorData, response };
+    // Throw structured ApiError
+    throw new ApiError(
+      errorData.error || 'Request failed',
+      response.status,
+      errorData.code,
+      errorData.details
+    );
   }
 
   // Handle cases where response might be empty (e.g., 204 No Content)

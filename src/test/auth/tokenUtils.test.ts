@@ -130,47 +130,43 @@ describe('Authentication Token Utilities', () => {
   });
 
   describe('getValidToken', () => {
-    it('should return token when valid', () => {
+    it('should return token when valid', async () => {
       const validToken = createMockToken(3600);
       localStorageMock.getItem.mockReturnValue(validToken);
 
-      const result = getValidToken();
+      const result = await getValidToken();
 
       expect(result).toBe(validToken);
       expect(dispatchEventMock).not.toHaveBeenCalled();
     });
 
-    it('should return null when no token exists', () => {
+    it('should return null when no token exists', async () => {
       localStorageMock.getItem.mockReturnValue(null);
 
-      const result = getValidToken();
+      const result = await getValidToken();
 
       expect(result).toBeNull();
       expect(dispatchEventMock).not.toHaveBeenCalled();
     });
 
-    it('should remove expired token and trigger logout event', () => {
+    it('should attempt refresh for expired token', async () => {
       const expiredToken = createMockToken(-3600);
       localStorageMock.getItem.mockReturnValue(expiredToken);
+      localStorageMock.getItem.mockReturnValueOnce(expiredToken); // For getToken()
+      localStorageMock.getItem.mockReturnValueOnce(null); // For getRefreshToken()
 
-      const result = getValidToken();
+      const result = await getValidToken();
 
       expect(result).toBeNull();
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('authToken');
-      expect(dispatchEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'auth:logout',
-          detail: { reason: 'token_expired_on_check' }
-        })
-      );
-      expect(console.warn).toHaveBeenCalledWith('Token expired, removing from storage');
+      expect(console.warn).toHaveBeenCalledWith('Token expired, attempting refresh');
+      expect(console.warn).toHaveBeenCalledWith('No refresh token available');
     });
 
-    it('should handle malformed token gracefully', () => {
+    it('should handle malformed token gracefully', async () => {
       const malformedToken = 'invalid-token';
       localStorageMock.getItem.mockReturnValue(malformedToken);
 
-      const result = getValidToken();
+      const result = await getValidToken();
 
       expect(result).toBeNull();
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('authToken');

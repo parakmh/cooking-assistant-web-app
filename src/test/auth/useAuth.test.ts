@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 vi.mock('@/lib/api', () => ({
   getToken: vi.fn(),
   getValidToken: vi.fn(),
+  getValidTokenSync: vi.fn(),
   removeToken: vi.fn(),
   setToken: vi.fn(),
 }));
@@ -23,7 +24,7 @@ const addEventListenerMock = vi.fn();
 const removeEventListenerMock = vi.fn();
 
 // Import mocked functions
-import { getToken, getValidToken, removeToken, setToken } from '@/lib/api';
+import { getToken, getValidToken, getValidTokenSync, removeToken, setToken } from '@/lib/api';
 
 describe('useAuth Hook', () => {
   beforeEach(() => {
@@ -63,7 +64,7 @@ describe('useAuth Hook', () => {
 
 
   it('should set authenticated when token exists', async () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
 
     const { result } = renderHook(() => useAuth());
 
@@ -77,7 +78,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should set unauthenticated when no token exists', async () => {
-    vi.mocked(getValidToken).mockReturnValue(null);
+    vi.mocked(getValidTokenSync).mockReturnValue(null);
 
     const { result } = renderHook(() => useAuth());
 
@@ -90,7 +91,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should register global logout event listener', () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
 
     renderHook(() => useAuth());
 
@@ -101,7 +102,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should handle global logout event', async () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
 
     const { result } = renderHook(() => useAuth());
 
@@ -134,7 +135,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should redirect to home on logout when not on home/login page', async () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
     
     // Mock being on a protected page
     Object.defineProperty(window, 'location', {
@@ -164,7 +165,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should not redirect when already on home or login page', async () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
     
     // Mock being on home page
     Object.defineProperty(window, 'location', {
@@ -195,7 +196,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should provide login function', async () => {
-    vi.mocked(getValidToken).mockReturnValue(null);
+    vi.mocked(getValidTokenSync).mockReturnValue(null);
 
     const { result } = renderHook(() => useAuth());
 
@@ -208,7 +209,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should provide logout function', async () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
 
     const { result } = renderHook(() => useAuth());
 
@@ -228,7 +229,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should provide loginWithToken function', async () => {
-    vi.mocked(getValidToken).mockReturnValue(null);
+    vi.mocked(getValidTokenSync).mockReturnValue(null);
 
     const { result } = renderHook(() => useAuth());
 
@@ -244,7 +245,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should cleanup event listener on unmount', () => {
-    vi.mocked(getValidToken).mockReturnValue('mock-token');
+    vi.mocked(getValidTokenSync).mockReturnValue('mock-token');
 
     const { unmount } = renderHook(() => useAuth());
 

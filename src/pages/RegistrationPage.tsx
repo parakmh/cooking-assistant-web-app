@@ -32,7 +32,7 @@ const RegistrationPage: React.FC = () => {
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
       const fieldErrors = getFieldErrors(err);
-      if (Object.keys(fieldErrors).length > 0) {
+      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
         // Set field-specific errors
         Object.entries(fieldErrors).forEach(([field, messages]) => {
           setFormError(field as keyof RegistrationFormData, {

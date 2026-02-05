@@ -22,12 +22,12 @@ describe('LoginPage', () => {
     // override the login handler to return 401
     server.use(
       http.post('http://127.0.0.1:8000/api/auth/login', () =>
-        HttpResponse.json({ message: 'Bad credentials' }, { status: 401 })
+        HttpResponse.json({ error: 'Bad credentials' }, { status: 401 })
       )
     )
     renderWithProviders(<LoginPage />)
     await userEvent.type(screen.getByLabelText(/email/i), 'foo@example.com')
-    await userEvent.type(screen.getByLabelText(/password/i), 'wrong')
+    await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword')
     await userEvent.click(screen.getByRole('button', { name: /login/i }))
 
     await waitFor(() =>
@@ -39,7 +39,7 @@ describe('LoginPage', () => {
     // the default mock returns a 200 with a token
     renderWithProviders(<LoginPage />)
     await userEvent.type(screen.getByLabelText(/email/i), 'foo@example.com')
-    await userEvent.type(screen.getByLabelText(/password/i), 'correct')
+    await userEvent.type(screen.getByLabelText(/password/i), 'correctpassword')
     await userEvent.click(screen.getByRole('button', { name: /login/i }))
 
     // since AuthProvider + react-router are in the wrapper,

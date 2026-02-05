@@ -316,12 +316,6 @@ export interface RecipeSuggestion {
   tags?: string[];
 }
 
-export interface RecipeSuggestionsResponse {
-  suggestions: RecipeSuggestion[];
-  message?: string; // Optional message from backend
-  userId?: string;  // Optional userId if backend includes it
-}
-
 // Receipt scanning interfaces
 export interface ReceiptItem {
   name: string;

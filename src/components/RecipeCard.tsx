@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, User } from "lucide-react";
+import { Clock, User, CheckCircle2 } from "lucide-react";
 import { getBackendDomain } from "@/lib/api";
 import { getRecipeImageUrl } from "@/lib/recipeImages";
 
@@ -16,6 +16,7 @@ interface Recipe {
   mealType?: string[];
   cuisine?: string;
   name?: string; // Some recipes use 'name' instead of 'title'
+  ingredientMatchPercentage?: number; // Ingredient match percentage
 }
 
 interface RecipeCardProps {
@@ -39,6 +40,14 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
     easy: "bg-green-100 text-green-800",
     medium: "bg-yellow-100 text-yellow-800",
     hard: "bg-red-100 text-red-800"
+  };
+
+  // Determine color for ingredient match percentage
+  const getMatchColor = (percentage: number) => {
+    if (percentage >= 75) return "bg-green-100 text-green-800 border-green-300";
+    if (percentage >= 50) return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    if (percentage >= 25) return "bg-orange-100 text-orange-800 border-orange-300";
+    return "bg-red-100 text-red-800 border-red-300";
   };
 
   // Determine the image source using the new mapping system
@@ -65,6 +74,14 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
           alt={recipe.title || recipe.name || 'Recipe image'}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
+        {recipe.ingredientMatchPercentage !== undefined && (
+          <div className="absolute top-2 left-2">
+            <span className={`flex items-center gap-1 ${getMatchColor(recipe.ingredientMatchPercentage)} text-xs px-2 py-1 rounded-full border font-medium shadow-sm`}>
+              <CheckCircle2 className="h-3 w-3" />
+              {recipe.ingredientMatchPercentage}% Match
+            </span>
+          </div>
+        )}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <span className={`badge ${difficultyColor[recipe.difficulty]} text-xs px-2 py-1 rounded-full`}>
             {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}

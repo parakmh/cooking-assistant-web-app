@@ -28,6 +28,7 @@ interface RecipeCardRecipe {
   mealType?: string[];
   cuisine?: string;
   name?: string;
+  ingredientMatchPercentage?: number;
 }
 
 // Helper function to transform backend suggestion to RecipeCardRecipe format
@@ -42,6 +43,7 @@ const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): Rec
   ingredients: suggestion.ingredients,
   mealType: suggestion.mealType,
   cuisine: suggestion.cuisine,
+  ingredientMatchPercentage: (suggestion as any).ingredientMatchPercentage || (suggestion as any).ingredient_match_percentage,
   // Don't pass imageUrl - let the new system determine the appropriate image
 });
 

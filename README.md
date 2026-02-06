@@ -38,13 +38,14 @@ Vite, TypeScript, React 18, shadcn/ui, Tailwind CSS, React Router, React Query
 
 ## 📚 Documentation
 
-- **[API Docs](doc/Api.md)** - API endpoints
+- **[API Docs](doc/Api.md)** - Backend API endpoints
+- **[Recipe Search API](doc/Api-RecipeSearch.md)** - Recipe embeddings service
 - **[Architecture](doc/System-Architecture.md)** - System design
 - **[Frontend Guide](.github/copilot-instructions.md)** - Development guide
 
 ## 🔗 Related Projects
 
 - **cooking-assistant-backend** - Django REST API
-- **cooking-assistant-llm** - LLM service
+- **cooking-assistant-recipe-embeddings** - Semantic recipe search (2.2M recipes)
 - **cooking-assistant-receipt-recognition-llm** - OCR service
 - **cooking-assistant-android-app** - Mobile app

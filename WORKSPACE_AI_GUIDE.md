@@ -1,6 +1,6 @@
 # Workspace Guide
 
-**5 Projects**: web-app (React), backend (Django), llm, receipt-recognition, android-app
+**5 Projects**: web-app (React), backend (Django), recipe-embeddings, receipt-recognition, android-app
 
 ## Quick Navigation
 
@@ -12,8 +12,11 @@
 ```
 User → Frontend (React) → Backend (Django) → PostgreSQL
                               ↓
-                          LLM Service (port 8001)
-                          Receipt OCR (port 8002)
+                          Recipe Embeddings Service (port 8008)
+                            ↓ pgvector
+                          Recipe Database (2.2M recipes)
+                          
+                          Receipt OCR (port 8009)
 ```
 
 ## Quick Start

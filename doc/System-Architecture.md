@@ -3,10 +3,11 @@
 ```mermaid
 graph TD
     User[User Browser] <-->|HTTPS| Frontend[Web Frontend]
-    Frontend <-->|API Call| Backend[BackEnd]
-    Backend <--> |RAG| RecipeDB[(Recipe Database)]
+    Frontend <-->|API Call| Backend[Backend API]
+    Backend <-->|Vector Search| RecipeEmbeddings[Recipe Embeddings Service]
+    RecipeEmbeddings <-->|pgvector| RecipeDB[(Recipe Database<br/>2.2M Recipes)]
     Backend <--> ApplicationDB[(Application Database)]
-    Backend <--> |API Call| LLM[LLM]
+    Backend <-->|OCR API| ReceiptService[Receipt Recognition]
 ```
 
 ### Considerations and future details: 

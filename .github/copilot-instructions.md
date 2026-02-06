@@ -8,7 +8,7 @@ This is the **React/TypeScript frontend** for KitchenAI Assistant, a cooking ass
 
 ### Related Projects
 - **Backend API**: `../cooking-assistant-backend` - Django REST Framework
-- **LLM Service**: `../cooking-assistant-llm` - LLM emulator service
+- **Recipe Search**: `../cooking-assistant-recipe-embeddings` - Semantic recipe search (2.2M recipes)
 - **Receipt Recognition**: `../cooking-assistant-receipt-recognition-llm` - OCR emulator
 - **Mobile App**: `../cooking-assistant-android-app` - Capacitor wrapper
 

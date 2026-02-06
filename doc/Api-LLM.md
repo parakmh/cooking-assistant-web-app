@@ -1,5 +1,11 @@
 # Cooking Assistant LLM API
 
+> **⚠️ DEPRECATED**: This documentation describes the old LLM-based recipe generation service, which has been replaced by the recipe embeddings service. 
+> 
+> **See [Api-RecipeSearch.md](Api-RecipeSearch.md) for current implementation** using semantic search over 2.2M real recipes from RecipeNLG.
+
+---
+
 This document defines the API endpoint for generating new recipes using an LLM and the prompt patterns to ensure the LLM responds in the expected JSON format.
 
 ## 1. Endpoint: GET /api/recipes

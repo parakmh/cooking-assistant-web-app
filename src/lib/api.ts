@@ -262,6 +262,9 @@ export const apiPost = <T = any>(endpoint: string, body: any, needsAuth: boolean
 export const apiPut = <T = any>(endpoint: string, body: any, needsAuth: boolean = true, isFormData: boolean = false) =>
   apiCall<T>(endpoint, { method: 'PUT', body: isFormData ? body : JSON.stringify(body), needsAuth, isFormData });
 
+export const apiPatch = <T = any>(endpoint: string, body: any, needsAuth: boolean = true, isFormData: boolean = false) =>
+  apiCall<T>(endpoint, { method: 'PATCH', body: isFormData ? body : JSON.stringify(body), needsAuth, isFormData });
+
 export const apiDelete = <T = any>(endpoint: string, needsAuth: boolean = true) =>
   apiCall<T>(endpoint, { method: 'DELETE', needsAuth });
 
@@ -438,6 +441,6 @@ export const updateSafeInventoryItem = async (
  * Toggle inventory item between tracked and staple
  */
 export const toggleStapleStatus = async (id: string): Promise<InventoryItemData> => {
-  const response = await api.patch<InventoryItemData>(`/inventory/${id}/toggle-staple`, {});
+  const response = await apiPatch<InventoryItemData>(`/inventory/${id}/toggle-staple`, {});
   return sanitizeInventoryItem(response);
 };

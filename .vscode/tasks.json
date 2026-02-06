@@ -1,0 +1,110 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Frontend (Web App)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder:cooking-assistant-web-app}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^([^\\s].*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*http://localhost:5173.*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start Backend (Django)",
+      "type": "shell",
+      "command": "cd ${workspaceFolder:cooking-assistant-backend} && source venv/bin/activate && python manage.py runserver",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*Performing system checks.*",
+          "endsPattern": ".*Starting development server at.*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start LLM Service",
+      "type": "shell",
+      "command": "cd ${workspaceFolder:cooking-assistant-llm} && source venv/bin/activate && uvicorn main:app --reload --port 8008",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*INFO.*Started reloader process.*",
+          "endsPattern": ".*Application startup complete.*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start Receipt Recognition Service",
+      "type": "shell",
+      "command": "cd ${workspaceFolder:cooking-assistant-receipt-recognition-llm} && source venv/bin/activate && uvicorn main:app --reload --port 8009 --host 0.0.0.0",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*INFO.*Started reloader process.*",
+          "endsPattern": ".*Application startup complete.*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start All Services",
+      "dependsOn": [
+        "Start Backend (Django)",
+        "Start LLM Service",
+        "Start Receipt Recognition Service",
+        "Start Frontend (Web App)"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -22,6 +22,8 @@ import RecipeCard from "@/components/RecipeCard";
 import MealTypeSelector from "@/components/MealTypeSelector";
 import { useToast } from "@/hooks/use-toast";
 import { getRecipeImageUrl } from "@/lib/recipeImages";
+import { getSafeInventory } from "@/lib/api";
+import IngredientBadgeListItem from "@/components/IngredientBadgeListItem";
 
 // Mock generated recipes data (recipes that were generated for the user)
 const mockGeneratedRecipes = [
@@ -77,6 +79,8 @@ const mockGeneratedRecipes = [
 
 const RecipesHistory = () => {
   const { toast } = useToast();
+  const [userStaples, setUserStaples] = useState<string[]>([]);
+  const [userInventory, setUserInventory] = useState<string[]>([]);
   
   const [recipes, setRecipes] = useState(mockGeneratedRecipes);
   const [selectedRecipe, setSelectedRecipe] = useState<typeof mockGeneratedRecipes[0] | null>(null);
@@ -88,6 +92,23 @@ const RecipesHistory = () => {
     mealType: "",
     isQuickCooking: false,
   });
+  
+  // Fetch user's inventory to determine staples and tracked items
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const data = await getSafeInventory();
+        const staples = data.items?.filter((item: any) => item.itemType === 'staple').map((item: any) => item.name) || [];
+        const tracked = data.items?.filter((item: any) => item.itemType !== 'staple').map((item: any) => item.name) || [];
+        setUserStaples(staples);
+        setUserInventory(tracked);
+      } catch (error) {
+        console.error('Failed to fetch inventory:', error);
+      }
+    };
+    
+    fetchInventory();
+  }, []);
   
   // Filtered recipes based on filters
   const filteredRecipes = recipes.filter(recipe => {
@@ -377,9 +398,16 @@ const RecipesHistory = () => {
                 
                 <div>
                   <h3 className="font-semibold text-lg mb-3">Ingredients</h3>
-                  <ul className="list-disc list-inside space-y-1">
+                  <ul className="space-y-2">
                     {selectedRecipe.ingredients.map((ingredient, index) => (
-                      <li key={index} className="text-sm">{ingredient}</li>
+                      <IngredientBadgeListItem
+                        key={index}
+                        ingredient={{ name: ingredient }}
+                        searchedIngredients={[]}
+                        userStaples={userStaples}
+                        userInventory={userInventory}
+                        showBadges={true}
+                      />
                     ))}
                   </ul>
                 </div>

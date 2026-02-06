@@ -1,17 +1,39 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getSafeRecipe, RecipeSuggestion } from '@/lib/api';
+import { getSafeRecipe, getSafeInventory, RecipeSuggestion } from '@/lib/api';
 import { getRecipeImageUrl } from '@/lib/recipeImages';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users } from 'lucide-react';
+import IngredientBadgeListItem from '@/components/IngredientBadgeListItem';
 
 const RecipeDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
+  const [userStaples, setUserStaples] = useState<string[]>([]);
+  const [userInventory, setUserInventory] = useState<string[]>([]);
+  
   const { data: recipe, isLoading, error } = useQuery<RecipeSuggestion, Error>({
     queryKey: ['recipe', id],
     queryFn: () => getSafeRecipe(id!), // Using safe wrapper
   });
+  
+  // Fetch user's inventory to determine staples and tracked items
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const data = await getSafeInventory();
+        const staples = data.items?.filter((item: any) => item.itemType === 'staple').map((item: any) => item.name) || [];
+        const tracked = data.items?.filter((item: any) => item.itemType !== 'staple').map((item: any) => item.name) || [];
+        setUserStaples(staples);
+        setUserInventory(tracked);
+      } catch (error) {
+        console.error('Failed to fetch inventory:', error);
+      }
+    };
+    
+    fetchInventory();
+  }, []);
 
   if (isLoading) return <div className="kitchen-container py-8">Loading recipe details...</div>;
   if (error || !recipe) return <div className="kitchen-container py-8">Error loading recipe details.</div>;
@@ -46,9 +68,16 @@ const RecipeDetailsPage = () => {
       </div>
       <section className="mb-6">
         <h2 className="text-2xl font-semibold mb-2">Ingredients</h2>
-        <ul className="list-disc list-inside space-y-1">
+        <ul className="space-y-2">
           {recipe.ingredients.map((ing, idx) => (
-            <li key={idx}>{ing.quantity} {ing.unit} {ing.name}</li>
+            <IngredientBadgeListItem
+              key={idx}
+              ingredient={ing}
+              searchedIngredients={[]}
+              userStaples={userStaples}
+              userInventory={userInventory}
+              showBadges={true}
+            />
           ))}
         </ul>
       </section>

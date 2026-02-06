@@ -1,9 +1,10 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import RecipeCard from '@/components/RecipeCard';
-import { RecipeSuggestion, getBackendDomain } from '@/lib/api';
+import { RecipeSuggestion, getBackendDomain, getSafeInventory } from '@/lib/api';
 import { sanitizeRecipe } from '@/lib/sanitize'; // Import sanitize function
 import { getRecipeImageUrl } from '@/lib/recipeImages';
+import IngredientBadgeListItem from '@/components/IngredientBadgeListItem';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,9 @@ const RecipeResults = () => {
   const location = useLocation();
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeSuggestion | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userStaples, setUserStaples] = useState<string[]>([]);
+  const [userInventory, setUserInventory] = useState<string[]>([]);
+  const [searchedIngredients, setSearchedIngredients] = useState<string[]>([]);
 
   // Ensure results and suggestedForYou are properly destructured and have defaults
   const { queryParams, results } = location.state || { queryParams: {}, results: { results: [], suggestedForYou: [] } };
@@ -58,6 +62,29 @@ const RecipeResults = () => {
   // SECURITY: Sanitize all recipes from location state to prevent XSS
   const suggestions: RecipeSuggestion[] = (results.suggestedForYou || []).map(sanitizeRecipe);
   const recipesFromSearch: RecipeSuggestion[] = (results.results || []).map(sanitizeRecipe);
+  
+  // Fetch user's inventory to determine staples and tracked items
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const data = await getSafeInventory();
+        const staples = data.items?.filter((item: any) => item.itemType === 'staple').map((item: any) => item.name) || [];
+        const tracked = data.items?.filter((item: any) => item.itemType !== 'staple').map((item: any) => item.name) || [];
+        setUserStaples(staples);
+        setUserInventory(tracked);
+      } catch (error) {
+        console.error('Failed to fetch inventory:', error);
+      }
+    };
+    
+    fetchInventory();
+    
+    // Parse searched ingredients from queryParams
+    if (queryParams.ingredients) {
+      const ingredients = queryParams.ingredients.split(',').map((i: string) => i.trim()).filter(Boolean);
+      setSearchedIngredients(ingredients);
+    }
+  }, [queryParams]);
 
   const handleViewRecipe = (recipe: RecipeSuggestion) => {
     // Sanitize before setting (defense in depth)
@@ -139,9 +166,16 @@ const RecipeResults = () => {
               />
               <section className="mb-6">
                 <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
-                <ul className="list-disc list-inside space-y-1">
+                <ul className="space-y-2">
                   {selectedRecipe.ingredients.map((ing, idx) => (
-                    <li key={idx}>{ing.quantity} {ing.unit} {ing.name}</li>
+                    <IngredientBadgeListItem
+                      key={idx}
+                      ingredient={ing}
+                      searchedIngredients={searchedIngredients}
+                      userStaples={userStaples}
+                      userInventory={userInventory}
+                      showBadges={true}
+                    />
                   ))}
                 </ul>
               </section>

@@ -27,8 +27,9 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, Search, Upload, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Search, Upload, Loader2, Star } from "lucide-react";
 import IngredientItem from "@/components/IngredientItem";
+import StapleCard from "@/components/StapleCard";
 import ReceiptScanModal from "@/components/ReceiptScanModal";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ import {
   getSafeInventory,
   addSafeInventoryItem,
   updateSafeInventoryItem,
+  toggleStapleStatus,
   InventoryItemData 
 } from "@/lib/api";
 
@@ -109,17 +111,28 @@ const Inventory = () => {
     fetchInventory();
   }, [toast]);
   
-  // Filter inventory based on search and category
-  const filteredInventory = inventory.filter(item => {
+  // Separate items into staples and tracked ingredients
+  const staples = inventory.filter(item => item.itemType === 'staple');
+  const trackedItems = inventory.filter(item => item.itemType !== 'staple');
+  
+  // Filter inventory based on search and category (applies to both staples and tracked)
+  const filteredStaples = staples.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    // Assuming item.category exists on InventoryItemData for client-side filtering,
-    // though it's not on the backend model. If not, this needs adjustment or removal.
+    const matchesCategory = selectedCategory === "All" || (item.category || "Pantry") === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+  
+  const filteredTracked = trackedItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || (item.category || "Pantry") === selectedCategory;
     const matchesExpiring = !expiringOnly || 
       (item.expiryDate && new Date(item.expiryDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
     
     return matchesSearch && matchesCategory && matchesExpiring;
   });
+  
+  // Legacy filtered inventory for compatibility (combines both)
+  const filteredInventory = [...filteredStaples, ...filteredTracked];
   
   const handleRemoveIngredient = async (id: string) => {
     try {
@@ -133,6 +146,29 @@ const Inventory = () => {
       console.error("Failed to remove ingredient:", error);
       toast({
         title: "Error removing ingredient",
+        description: getErrorMessage(error),
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleToggleStaple = async (id: string) => {
+    try {
+      const updatedItem = await toggleStapleStatus(id);
+      setInventory(prevInventory =>
+        prevInventory.map(item =>
+          item.id === id ? updatedItem : item
+        )
+      );
+      const itemType = updatedItem.itemType === 'staple' ? 'staple' : 'tracked ingredient';
+      toast({
+        title: `Converted to ${itemType}`,
+        description: `${updatedItem.name} is now a ${itemType}`,
+      });
+    } catch (error: any) {
+      console.error("Failed to toggle staple status:", error);
+      toast({
+        title: "Error toggling staple status",
         description: getErrorMessage(error),
         variant: "destructive",
       });
@@ -193,8 +229,8 @@ const Inventory = () => {
     setEditingItem({
         id: item.id,
         name: item.name,
-        quantity: String(item.quantity), // Convert number to string for form
-        unit: item.unit,
+        quantity: item.quantity ? String(item.quantity) : "", // Convert number to string for form
+        unit: item.unit || "pcs",
         category: item.category || "Pantry", // Use existing or default
         expiryDate: item.expiryDate ? new Date(item.expiryDate) : undefined // Convert string to Date
     });
@@ -411,41 +447,78 @@ const Inventory = () => {
             </div>
           </div>
           
-          <TabsContent value={expiringOnly ? "expiring" : "all"} className="mt-0">
-            {filteredInventory.length > 0 ? (
-              <div className="space-y-2">
-                {filteredInventory.map((ingredient) => (
-                  <IngredientItem
-                    key={ingredient.id}
-                    // Adapt data for IngredientItem. Ideally, IngredientItem is updated.
-                    ingredient={{
-                      ...ingredient,
-                      quantity: String(ingredient.quantity), 
-                      expiryDate: ingredient.expiryDate || undefined,
-                      // Ensure 'category' is available if IngredientItem expects it
-                      category: ingredient.category || "Pantry", 
-                    }}
-                    inInventory={true} 
-                    onRemove={() => handleRemoveIngredient(ingredient.id)}
-                    onEdit={() => openEditDialog(ingredient)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground mb-4">
-                  {expiringOnly ? "No expiring ingredients found." : (searchQuery || selectedCategory !== "All" ? "No ingredients match your filters." : "Your inventory is empty.")}
-                </p>
-                {(searchQuery || selectedCategory !== "All" || expiringOnly) && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setExpiringOnly(false); }}
-                  >
-                    Clear filters
-                  </Button>
-                )}
+          <TabsContent value={expiringOnly ? "expiring" : "all"} className="mt-0 space-y-6">
+            {/* Kitchen Staples Section */}
+            {filteredStaples.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="h-5 w-5 text-amber-600 fill-amber-600" />
+                  <h3 className="text-lg font-semibold">Kitchen Staples</h3>
+                  <Badge variant="outline" className="bg-amber-100/50 text-amber-800 border-amber-300">
+                    {filteredStaples.length}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  {filteredStaples.map((staple) => (
+                    <StapleCard
+                      key={staple.id}
+                      id={staple.id}
+                      name={staple.name}
+                      category={staple.category}
+                      onToggle={handleToggleStaple}
+                      onRemove={handleRemoveIngredient}
+                      onEdit={openEditDialog}
+                    />
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* Fresh Ingredients Section */}
+            <div>
+              {filteredStaples.length > 0 && (
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-semibold">Fresh Ingredients</h3>
+                  <Badge variant="outline">
+                    {filteredTracked.length}
+                  </Badge>
+                </div>
+              )}
+              {filteredTracked.length > 0 ? (
+                <div className="space-y-2">
+                  {filteredTracked.map((ingredient) => (
+                    <IngredientItem
+                      key={ingredient.id}
+                      ingredient={{
+                        ...ingredient,
+                        quantity: ingredient.quantity ? String(ingredient.quantity) : "0", 
+                        unit: ingredient.unit || "pcs",
+                        expiryDate: ingredient.expiryDate || undefined,
+                        category: ingredient.category || "Pantry", 
+                      }}
+                      inInventory={true} 
+                      onRemove={() => handleRemoveIngredient(ingredient.id)}
+                      onEdit={() => openEditDialog(ingredient)}
+                      onToggleStaple={() => handleToggleStaple(ingredient.id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground mb-4">
+                    {expiringOnly ? "No expiring ingredients found." : (searchQuery || selectedCategory !== "All" ? "No ingredients match your filters." : (filteredStaples.length > 0 ? "No fresh ingredients yet. Add some above!" : "Your inventory is empty."))}
+                  </p>
+                  {(searchQuery || selectedCategory !== "All" || expiringOnly) && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setExpiringOnly(false); }}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -290,11 +290,12 @@ export interface UserData {
 export interface InventoryItemData {
   id: string;
   name: string;
-  quantity: number; // Backend expects float, ensure conversion from string input
-  unit: string;
+  quantity?: number | null; // Optional for staples, backend expects float
+  unit?: string | null; // Optional for staples
   expiryDate?: string | null; // ISO date string (YYYY-MM-DD)
   category?: string; // Frontend-specific for now
   addedDate?: string; // ISO datetime string from backend
+  itemType?: 'tracked' | 'staple'; // Type of inventory item
 }
 
 export interface RecipeSuggestion {
@@ -431,4 +432,12 @@ export const updateSafeInventoryItem = async (
 ): Promise<InventoryItemData> => {
   const updatedItem = await apiPut<InventoryItemData>(`/inventory/${id}`, item);
   return sanitizeInventoryItem(updatedItem);
+};
+
+/**
+ * Toggle inventory item between tracked and staple
+ */
+export const toggleStapleStatus = async (id: string): Promise<InventoryItemData> => {
+  const response = await api.patch<InventoryItemData>(`/inventory/${id}/toggle-staple`, {});
+  return sanitizeInventoryItem(response);
 };

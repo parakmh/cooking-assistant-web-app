@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Plus, Trash, Edit3 } from 'lucide-react';
+import { Check, Plus, Trash, Edit3, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface Ingredient {
@@ -17,8 +17,9 @@ interface IngredientItemProps {
   inInventory?: boolean;
   onAdd?: (id: string) => void;
   onRemove?: (id: string) => void;
-  onEdit?: (id: string) => void; // Add onEdit to props
+  onEdit?: (id: string) => void;
   onSelect?: (id: string) => void;
+  onToggleStaple?: (id: string) => void; // New prop for toggling staple status
   selected?: boolean;
 }
 
@@ -27,8 +28,9 @@ export default function IngredientItem({
   inInventory = false,
   onAdd,
   onRemove,
-  onEdit, // Destructure onEdit
+  onEdit,
   onSelect,
+  onToggleStaple, // Destructure new prop
   selected = false
 }: IngredientItemProps) {
   // Calculate days until expiry if expiryDate exists
@@ -83,8 +85,20 @@ export default function IngredientItem({
           </Badge>
         )}
         
-        {(onAdd || onRemove || onEdit) && (
+        {(onAdd || onRemove || onEdit || onToggleStaple) && (
           <div className="flex items-center gap-2">
+            {inInventory && onToggleStaple && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); onToggleStaple(ingredient.id); }}
+                className="text-xs"
+                title="Mark as kitchen staple"
+              >
+                <Star className="h-3 w-3 mr-1" />
+                Staple
+              </Button>
+            )}
             {inInventory && onEdit && (
               <Button 
                 variant="outline" 
@@ -92,7 +106,7 @@ export default function IngredientItem({
                 onClick={(e) => { e.stopPropagation(); onEdit(ingredient.id); }}
                 className="h-8 w-8"
               >
-                <Edit3 className="h-4 w-4" /> {/* Assuming Edit3 is imported or use another icon */}
+                <Edit3 className="h-4 w-4" />
               </Button>
             )}
             {(onAdd || onRemove) && (

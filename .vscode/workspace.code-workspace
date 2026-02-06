@@ -1,126 +1,23 @@
 {
 	"folders": [
 		{
-			"path": "cooking-assistant-web-app"
+			"path": "../../cooking-assistant-web-app"
 		},
 		{
-			"path": "cooking-assistant-backend"
+			"path": "../../cooking-assistant-backend"
 		},
 		{
-			"path": "cooking-assistant-llm"
+			"path": "../../cooking-assistant-llm"
 		},
 		{
-			"path": "cooking-assistant-recipe-embeddings"
+			"path": "../../cooking-assistant-recipe-embeddings"
 		},
 		{
-			"path": "cooking-assistant-android-app"
+			"path": "../../cooking-assistant-android-app"
 		},
 		{
-			"path": "cooking-assistant-receipt-recognition-llm"
+			"path": "../../cooking-assistant-receipt-recognition-llm"
 		}
 	],
-	"settings": {},
-	"tasks": {
-		"version": "2.0.0",
-		"tasks": [
-			{
-				"label": "Start Frontend (Web App)",
-				"type": "shell",
-				"command": "npm run dev",
-				"options": {
-					"cwd": "${workspaceFolder:cooking-assistant-web-app}"
-				},
-				"isBackground": true,
-				"problemMatcher": {
-					"pattern": {
-						"regexp": "^$",
-						"file": 1,
-						"location": 2,
-						"message": 3
-					},
-					"background": {
-						"activeOnStart": true,
-						"beginsPattern": ".",
-						"endsPattern": "Local:.*http"
-					}
-				}
-			},
-			{
-				"label": "Start Backend (Django)",
-				"type": "shell",
-				"command": "source venv/bin/activate && python manage.py runserver",
-				"options": {
-					"cwd": "${workspaceFolder:cooking-assistant-backend}"
-				},
-				"isBackground": true,
-				"problemMatcher": {
-					"pattern": {
-						"regexp": "^$",
-						"file": 1,
-						"location": 2,
-						"message": 3
-					},
-					"background": {
-						"activeOnStart": true,
-						"beginsPattern": ".",
-						"endsPattern": "Starting development server"
-					}
-				}
-			},
-			{
-				"label": "Start Recipe Embeddings Service",
-				"type": "shell",
-				"command": "source venv/bin/activate && uvicorn main:app --reload --port 8008",
-				"options": {
-					"cwd": "${workspaceFolder:cooking-assistant-recipe-embeddings}"
-				},
-				"isBackground": true,
-				"problemMatcher": {
-					"pattern": {
-						"regexp": "^$",
-						"file": 1,
-						"location": 2,
-						"message": 3
-					},
-					"background": {
-						"activeOnStart": true,
-						"beginsPattern": ".",
-						"endsPattern": "Uvicorn running on"
-					}
-				}
-			},
-			{
-				"label": "Start Receipt Recognition Service",
-				"type": "shell",
-				"command": "source venv/bin/activate && uvicorn main:app --reload --port 8009 --host 0.0.0.0",
-				"options": {
-					"cwd": "${workspaceFolder:cooking-assistant-receipt-recognition-llm}"
-				},
-				"isBackground": true,
-				"problemMatcher": {
-					"pattern": {
-						"regexp": "^$",
-						"file": 1,
-						"location": 2,
-						"message": 3
-					},
-					"background": {
-						"activeOnStart": true,
-						"beginsPattern": ".",
-						"endsPattern": "Uvicorn running on"
-					}
-				}
-			},
-			{
-				"label": "Start All Services",
-				"dependsOn": [
-					"Start Backend (Django)",
-					"Start Recipe Embeddings Service",
-					"Start Receipt Recognition Service",
-					"Start Frontend (Web App)"
-				],
-				"problemMatcher": []
-			}
-		]
-	}
+	"settings": {}
 }

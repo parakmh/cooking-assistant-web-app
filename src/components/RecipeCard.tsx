@@ -82,11 +82,6 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
             </span>
           </div>
         )}
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
-          <span className={`badge ${difficultyColor[recipe.difficulty]} text-xs px-2 py-1 rounded-full`}>
-            {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}
-          </span>
-        </div>
       </div>
       
       <CardHeader className="p-4 pb-0">

@@ -1,10 +1,13 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import RecipeCard from '@/components/RecipeCard';
-import { RecipeSuggestion, getBackendDomain, getSafeInventory } from '@/lib/api';
+import { RecipeSuggestion, getBackendDomain, getSafeInventory, toggleRecipeFavorite } from '@/lib/api';
 import { sanitizeRecipe } from '@/lib/sanitize'; // Import sanitize function
 import { getRecipeImageUrl } from '@/lib/recipeImages';
 import IngredientBadgeListItem from '@/components/IngredientBadgeListItem';
+import { useToast } from '@/hooks/use-toast';
+import { Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -50,11 +53,13 @@ const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): Rec
 
 const RecipeResults = () => {
   const location = useLocation();
+  const { toast } = useToast();
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeSuggestion | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userStaples, setUserStaples] = useState<string[]>([]);
   const [userInventory, setUserInventory] = useState<string[]>([]);
   const [searchedIngredients, setSearchedIngredients] = useState<string[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 
   // Ensure results and suggestedForYou are properly destructured and have defaults
   const { queryParams, results } = location.state || { queryParams: {}, results: { results: [], suggestedForYou: [] } };
@@ -88,13 +93,44 @@ const RecipeResults = () => {
 
   const handleViewRecipe = (recipe: RecipeSuggestion) => {
     // Sanitize before setting (defense in depth)
-    setSelectedRecipe(sanitizeRecipe(recipe));
+    const sanitizedRecipe = sanitizeRecipe(recipe);
+    setSelectedRecipe(sanitizedRecipe);
     setIsModalOpen(true);
   };
 
+  const handleToggleFavorite = async (recipe: RecipeSuggestion) => {
+    try {
+      const result = await toggleRecipeFavorite(recipe.id, recipe);
+      
+      if (result.isFavorite) {
+        setFavoriteIds(prev => new Set([...prev, recipe.id]));
+        toast({
+          title: "Added to favorites",
+          description: "Recipe saved to your favorites",
+        });
+      } else {
+        setFavoriteIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(recipe.id);
+          return newSet;
+        });
+        toast({
+          title: "Removed from favorites",
+          description: "Recipe removed from your favorites",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update favorites",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="kitchen-container py-8">
-      <h1 className="text-3xl font-bold mb-6">Recipe Generation Results</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Recipe Suggestions</h1>
 
       {/* Displaying Main Search Results - if any */}
       {recipesFromSearch.length > 0 && (
@@ -152,18 +188,28 @@ const RecipeResults = () => {
                   </span>
                 </DialogDescription>
               </DialogHeader>
-              <img
-                src={getRecipeImageUrl({
-                  name: selectedRecipe.name,
-                  ingredients: selectedRecipe.ingredients,
-                  tags: selectedRecipe.tags,
-                  mealType: selectedRecipe.mealType,
-                  cuisine: selectedRecipe.cuisine,
-                  imageUrl: selectedRecipe.imageUrl
-                })}
-                alt={selectedRecipe.name}
-                className="w-full h-64 object-cover rounded-lg mb-6"
-              />
+              <div className="relative">
+                <img
+                  src={getRecipeImageUrl({
+                    name: selectedRecipe.name,
+                    ingredients: selectedRecipe.ingredients,
+                    tags: selectedRecipe.tags,
+                    mealType: selectedRecipe.mealType,
+                    cuisine: selectedRecipe.cuisine,
+                    imageUrl: selectedRecipe.imageUrl
+                  })}
+                  alt={selectedRecipe.name}
+                  className="w-full h-64 object-cover rounded-lg mb-6"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`absolute top-3 right-3 ${favoriteIds.has(selectedRecipe.id) ? 'text-red-500' : 'text-gray-400'} hover:text-red-500 bg-white/80 backdrop-blur-sm rounded-full shadow-md`}
+                  onClick={() => handleToggleFavorite(selectedRecipe)}
+                >
+                  <Heart className={`h-6 w-6 ${favoriteIds.has(selectedRecipe.id) ? 'fill-current' : ''}`} />
+                </Button>
+              </div>
               <section className="mb-6">
                 <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
                 <ul className="space-y-2">

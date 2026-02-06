@@ -444,3 +444,37 @@ export const toggleStapleStatus = async (id: string): Promise<InventoryItemData>
   const response = await apiPatch<InventoryItemData>(`/inventory/${id}/toggle-staple`, {});
   return sanitizeInventoryItem(response);
 };
+
+/**
+ * Get all favorite recipes for the authenticated user
+ */
+export const getFavoriteRecipes = async (): Promise<{ favorites: Array<{ id: string; recipe: RecipeSuggestion; createdAt: string }> }> => {
+  const response = await apiGet<{ favorites: Array<{ id: string; recipe: RecipeSuggestion; createdAt: string }> }>('/recipes/favorites/list');
+  
+  // Sanitize all recipe data
+  if (response.favorites && Array.isArray(response.favorites)) {
+    response.favorites = response.favorites.map(fav => ({
+      ...fav,
+      recipe: sanitizeRecipe(fav.recipe)
+    }));
+  }
+  
+  return response;
+};
+
+/**
+ * Toggle favorite status of a recipe (add or remove from favorites)
+ * Handles both local recipes and external recipes from embeddings service
+ */
+export const toggleRecipeFavorite = async (recipeId: string, recipeData?: RecipeSuggestion): Promise<{ isFavorite: boolean; message: string }> => {
+  // For external recipes (from embeddings), send recipe data to cache it
+  const payload = recipeData ? { recipe_data: recipeData } : {};
+  return await apiPost<{ isFavorite: boolean; message: string }>(`/recipes/${recipeId}/favorite`, payload);
+};
+
+/**
+ * Check if a recipe is favorited by the authenticated user
+ */
+export const checkRecipeFavorite = async (recipeId: string): Promise<{ isFavorite: boolean }> => {
+  return await apiGet<{ isFavorite: boolean }>(`/recipes/${recipeId}/is-favorite`);
+};

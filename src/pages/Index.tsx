@@ -171,8 +171,13 @@ const Index = () => {
     fetchUserProfile();
   }, [isAuthenticated]);
   
-  // Filter inventory based on search and category
+  // Filter inventory based on search and category (exclude staples - they're in separate section on Inventory page)
   const filteredInventory = inventory.filter(item => {
+    // Skip staples on landing page
+    if (item.itemType === 'staple') {
+      return false;
+    }
+    
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
     const matchesExpiring = !expiringOnly || 
@@ -650,7 +655,8 @@ const Index = () => {
                       key={ingredient.id}
                       ingredient={{
                         ...ingredient,
-                        quantity: String(ingredient.quantity),
+                        quantity: ingredient.quantity != null ? String(ingredient.quantity) : "0",
+                        unit: ingredient.unit || "unit",
                         category: ingredient.category || "Pantry", // Ensure category is always provided
                       }}
                       inInventory={true}
@@ -693,7 +699,8 @@ const Index = () => {
                       key={ingredient.id}
                       ingredient={{
                         ...ingredient,
-                        quantity: String(ingredient.quantity),
+                        quantity: ingredient.quantity != null ? String(ingredient.quantity) : "0",
+                        unit: ingredient.unit || "unit",
                         category: ingredient.category || "Pantry", // Ensure category is always provided
                       }}
                       inInventory={true}

@@ -26,7 +26,6 @@ interface RecipeCardRecipe {
   imageUrl?: string; // Made optional since we generate it
   cookTime: string;
   servings: number;
-  difficulty: "easy" | "medium" | "hard";
   tags: string[];
   ingredients?: Array<{ name: string; quantity: string; unit: string }>;
   mealType?: string[];
@@ -42,7 +41,6 @@ const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): Rec
   name: suggestion.name,
   cookTime: `${(suggestion.prepTimeMinutes || 0) + (suggestion.cookTimeMinutes || 0)} mins`,
   servings: suggestion.servings,
-  difficulty: (suggestion.difficulty?.toLowerCase() || 'medium') as "easy" | "medium" | "hard", // Handle missing difficulty
   tags: suggestion.tags || [],
   ingredients: suggestion.ingredients,
   mealType: suggestion.mealType,

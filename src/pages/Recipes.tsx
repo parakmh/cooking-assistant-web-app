@@ -198,7 +198,6 @@ const RecipesHistory = () => {
                       title: recipe.name,
                       cookTime: `${(recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0)} mins`,
                       servings: recipe.servings || 1,
-                      difficulty: recipe.difficulty || 'Medium',
                       tags: recipe.tags || [],
                       ingredients: recipe.ingredients?.map((ing: any) => 
                         typeof ing === 'string' ? ing : ing.name || ''

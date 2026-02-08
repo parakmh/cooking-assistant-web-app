@@ -10,7 +10,6 @@ interface Recipe {
   imageUrl?: string; // Made optional since we'll generate it
   cookTime: string;
   servings: number;
-  difficulty: "easy" | "medium" | "hard";
   tags: string[];
   ingredients?: string[] | Array<{ name: string; quantity: string; unit: string }>;
   mealType?: string[];
@@ -34,12 +33,6 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
   
   const handleView = () => {
     onView?.(recipe.id);
-  };
-  
-  const difficultyColor = {
-    easy: "bg-green-100 text-green-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    hard: "bg-red-100 text-red-800"
   };
 
   // Determine color for ingredient match percentage

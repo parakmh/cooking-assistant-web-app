@@ -42,7 +42,7 @@ const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): Rec
   name: suggestion.name,
   cookTime: `${(suggestion.prepTimeMinutes || 0) + (suggestion.cookTimeMinutes || 0)} mins`,
   servings: suggestion.servings,
-  difficulty: suggestion.difficulty.toLowerCase() as "easy" | "medium" | "hard", // Ensure lowercase and type assertion
+  difficulty: (suggestion.difficulty?.toLowerCase() || 'medium') as "easy" | "medium" | "hard", // Handle missing difficulty
   tags: suggestion.tags || [],
   ingredients: suggestion.ingredients,
   mealType: suggestion.mealType,

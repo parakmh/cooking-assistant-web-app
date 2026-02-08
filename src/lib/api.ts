@@ -310,7 +310,7 @@ export interface RecipeSuggestion {
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
-  difficulty: "easy" | "medium" | "hard";
+  difficulty?: "easy" | "medium" | "hard"; // Optional - not all recipe sources provide this
   averageRating?: number;
   ratingsCount?: number;
   imageUrl?: string;

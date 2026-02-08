@@ -140,11 +140,7 @@ export function sanitizeRecipe<T extends Record<string, any>>(recipe: T): T {
   
   const sanitized = { ...recipe };
   
-  // Sanitize recipe name (strict - no HTML)
-  if (sanitized.name) {
-    sanitized.name = sanitizeText(sanitized.name);
-  }
-  
+  // Sanitize recipe title (strict - no HTML)
   if (sanitized.title) {
     sanitized.title = sanitizeText(sanitized.title);
   }

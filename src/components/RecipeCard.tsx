@@ -14,7 +14,6 @@ interface Recipe {
   ingredients?: string[] | Array<{ name: string; quantity: string; unit: string }>;
   mealType?: string[];
   cuisine?: string;
-  name?: string; // Some recipes use 'name' instead of 'title'
   ingredientMatchPercentage?: number; // Ingredient match percentage
 }
 
@@ -45,7 +44,6 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
 
   // Determine the image source using the new mapping system
   const imageSrc = getRecipeImageUrl({
-    name: recipe.name,
     title: recipe.title,
     ingredients: recipe.ingredients,
     tags: recipe.tags,
@@ -64,7 +62,7 @@ export default function RecipeCard({ recipe, onView, onSave, saved = false }: Re
       <div className="relative h-48 overflow-hidden">
         <img
           src={finalImageSrc}
-          alt={recipe.title || recipe.name || 'Recipe image'}
+          alt={recipe.title || 'Recipe image'}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
         {recipe.ingredientMatchPercentage !== undefined && (

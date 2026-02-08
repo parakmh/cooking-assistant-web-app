@@ -43,17 +43,17 @@ const RecipeDetailsPage = () => {
       <Button variant="outline" asChild>
         <Link to="/recipes">Back to Recipes</Link>
       </Button>
-      <h1 className="text-3xl font-bold mt-4 mb-6">{recipe.name}</h1>
+      <h1 className="text-3xl font-bold mt-4 mb-6">{recipe.title}</h1>
       <img
         src={getRecipeImageUrl({
-          name: recipe.name,
+          name: recipe.title,
           ingredients: recipe.ingredients,
           tags: recipe.tags,
           mealType: recipe.mealType,
           cuisine: recipe.cuisine,
           imageUrl: recipe.imageUrl
         })}
-        alt={recipe.name}
+        alt={recipe.title}
         className="w-full h-64 object-cover rounded-lg mb-6"
       />
       <div className="flex items-center gap-4 mb-6">

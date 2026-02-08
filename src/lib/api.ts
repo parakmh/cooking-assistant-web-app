@@ -303,7 +303,7 @@ export interface InventoryItemData {
 
 export interface RecipeSuggestion {
   id: string;
-  name: string;
+  title: string;
   description?: string;
   mealType: string[];
   cuisine: string;

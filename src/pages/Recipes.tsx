@@ -257,14 +257,14 @@ const RecipesHistory = () => {
               <div className="space-y-6">
                 <img 
                   src={getRecipeImageUrl({
-                    title: selectedRecipe.name,
+                    title: selectedRecipe.title,
                     ingredients: selectedRecipe.ingredients?.map((ing: any) => 
                       typeof ing === 'string' ? ing : ing.name || ''
                     ) || [],
                     tags: selectedRecipe.tags || [],
                     mealType: selectedRecipe.mealType || []
                   })} 
-                  alt={selectedRecipe.name}
+                  alt={selectedRecipe.title}
                   className="w-full h-64 object-cover rounded-lg"
                 />
                 

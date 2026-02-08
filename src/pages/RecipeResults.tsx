@@ -30,15 +30,13 @@ interface RecipeCardRecipe {
   ingredients?: Array<{ name: string; quantity: string; unit: string }>;
   mealType?: string[];
   cuisine?: string;
-  name?: string;
   ingredientMatchPercentage?: number;
 }
 
 // Helper function to transform backend suggestion to RecipeCardRecipe format
 const transformSuggestionToRecipeCardProps = (suggestion: RecipeSuggestion): RecipeCardRecipe => ({
   id: suggestion.id,
-  title: suggestion.name,
-  name: suggestion.name,
+  title: suggestion.title,
   cookTime: `${(suggestion.prepTimeMinutes || 0) + (suggestion.cookTimeMinutes || 0)} mins`,
   servings: suggestion.servings,
   tags: suggestion.tags || [],
@@ -174,7 +172,7 @@ const RecipeResults = () => {
           {selectedRecipe && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold">{selectedRecipe.name}</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">{selectedRecipe.title}</DialogTitle>
                 <DialogDescription className="flex items-center gap-4 mt-2 mb-6">
                   <span className="flex items-center gap-1">
                     <Clock className="h-5 w-5" />
@@ -189,14 +187,14 @@ const RecipeResults = () => {
               <div className="relative">
                 <img
                   src={getRecipeImageUrl({
-                    name: selectedRecipe.name,
+                    name: selectedRecipe.title,
                     ingredients: selectedRecipe.ingredients,
                     tags: selectedRecipe.tags,
                     mealType: selectedRecipe.mealType,
                     cuisine: selectedRecipe.cuisine,
                     imageUrl: selectedRecipe.imageUrl
                   })}
-                  alt={selectedRecipe.name}
+                  alt={selectedRecipe.title}
                   className="w-full h-64 object-cover rounded-lg mb-6"
                 />
                 <Button
